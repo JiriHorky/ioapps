@@ -2,11 +2,8 @@
 
 = Introduction =
 
-IO profiler is a GUI applications that parses strace output and reports many useful information about application's behavior in terms of IO.
+IO profiler is a GUI application that parses a list of IO system calls (currently recorded by strace) issued by an application and eports useful information about which files were accessed, when they were accessed, which parts of them, how fast etc.
 
 = Details =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+http://code.google.com/images/code_sm.png
