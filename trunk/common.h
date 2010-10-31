@@ -94,7 +94,6 @@
 #define ACT_MASK 0x0000007F
 #define ACT_CONVERT 01
 #define ACT_SIMULATE 02
-#define ACT_LIST 04
 #define ACT_REPLICATE 010
 #define ACT_STATS 020
 #define ACT_CHECK 040
