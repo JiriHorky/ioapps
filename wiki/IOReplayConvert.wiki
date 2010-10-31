@@ -5,6 +5,7 @@ Storing and also processing text output from strace command is inefficient. For 
   * it is approximately twice smaller
   * it is much faster to process when loading 
   * it is also architecture (32/64bits) independent
+  * the binary format is a default format for [ioprofiler] (but it can also open pure strace outputs)
 
 = How =
 To convert file _strace.out_ to the binary file called _strace.bin, run:
