@@ -3,19 +3,33 @@ IOapps, an IO profiler and IO traces replayer
 
 Quick description
 -----------------
-IOapps consists of two modules 
+IOapps consists of two applications: ioreplay and ioprofiler. Both of them share common code base,
+the input parsing and handling.
+
+ioreplay is mainly intended for replaying of recorded traces, whereas ioprofiler is a GUI application
+for plotting application's IO access pattern.
+
+Both application can currently read strace output produced by:
+strace -q -a1 -s0 -f -tttT -oOUT_FILE -e trace=file,desc,process,socket APPLICATION ARGUMENTS
+
+Both applications can also read binary format of the above data, which is smaller, faster to process and
+architecture independent.
 
 
 Building:
 -----------------
-As always, run:
+To build both application, run:
 'make'
 
-and
+and to install it:
 
 'make install'
 
-This should build and install all necessary binaries, man pages and python modules.
+If you only want to build or install one of them, run:
+'make replay' or 'make profiler'
+and then:
+'make install_replay' or 'make install_profiler'.
+
 
 Features:
 --------
