@@ -1,7 +1,7 @@
 #summary IOReplay - converting to binary format
 
 = Binary format =
-Storing and also processing text output from strace command is inefficient. For that reason, one can convert it to the binary form that has following advantages:
+Storing and also processing text output from strace command is inefficient. For that reason, one can convert it to a binary form that has following advantages:
   * it is approximately twice smaller
   * it is much faster to process when loading 
   * it is also architecture (32/64bits) independent
