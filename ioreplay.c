@@ -43,7 +43,6 @@ static struct option ioreplay_options[] = {
    { "format",			1,		NULL,	'F' },
    { "help",			0,		NULL,	'h' },
    { "ignore",			1,		NULL,	'i' },
-   { "list",			0,		NULL,	'l' },
    { "map",				0,		NULL,	'm' },
    { "output",			1,		NULL,	'o' },
    { "replicate",		0,		NULL,	'r' },
@@ -68,8 +67,6 @@ printf("Usage: %s -c -f <file> [-F <format>] [-o <out>] [-v]\n", name);
 printf("   converts <file> in format <format> to binary form into file <out>\n\n");
 printf("Usage: %s -S -f <file> [-v]\n", name);
 printf("   displays some statistics about syscalls recorded in <file> (must be in " FORMAT_STRACE " format)\n\n");
-printf("Usage: %s -l -f <file> [-F <format>] [-i <file>] [-m <file>] [-v]\n", name);
-printf("   lists all files to which access was recorded in file <file>.\n\n");
 printf("Usage: %s -C -f <file> [-F <format>] [-i <file>] [-m <file>] [-v]\n", name);
 printf("   checks whether local enviroment is ready for replaying traces recorded in <file>.\n\n");
 printf("Usage: %s -r -f <file> [-F <format>] [-t <mode>] [-b <number>] [-i <file>] [-m <file>] [-v]\n", name);
@@ -87,8 +84,6 @@ printf("\n\
  -h --help          prints this message\n\
  -i --ignore <file> sets file containing names which we should not touch during\n\
                     replaying. I.e. no syscall operation will be performed on given file.\n\
- -l --list          displays filenames of successful opens, unlinks and mkdirs.\n\
-                    Useful when generating files for -i and -m.\n\
  -m --map <file>    sets containing file names mapping. When opening file,\n\
                     if there is mapping for it, it will open mapped file instead.\n\
                     See README for more information.\n\
@@ -145,7 +140,7 @@ int main(int argc, char * * argv) {
 	gettimeofday(&global_start, NULL);
 
 	/* Parse parameters */
-	while ((c = getopt_long (argc, argv, "b:cCf:F:hi:lm:o:rs:St:vV", ioreplay_options, NULL)) != -1 ) {
+	while ((c = getopt_long (argc, argv, "b:cCf:F:hi:m:o:rs:St:vV", ioreplay_options, NULL)) != -1 ) {
 		switch (c) {
 			case 'b':
 				cpu = atoi(optarg);
@@ -168,9 +163,6 @@ int main(int argc, char * * argv) {
 				break;
 			case 'i':
 				strncpy(ignorefile, optarg, MAX_STRING);
-				break;
-			case 'l':
-				action |= ACT_LIST;
 				break;
 			case 'm':
 				strncpy(mapfile, optarg, MAX_STRING);
@@ -256,13 +248,6 @@ int main(int argc, char * * argv) {
 		if (replicate(list, cpu, scale, SIM_MASK, ifilename, mfilename) != 0) {
 			ERRORPRINTF("An error occurred during replicating.%s", "\n");
 		}
-		simulate_finish();
-	} else if (action & ACT_LIST) {
-		simulate_init(ACT_LIST);
-		if (replicate(list, cpu, scale, SIM_MASK, ifilename, mfilename) != 0) {
-			ERRORPRINTF("An error occurred during replicating.%s", "\n");
-		}
-		simulate_list_files();
 		simulate_finish();
 	} else if (action & ACT_CHECK) {
 		simulate_init(ACT_CHECK);
