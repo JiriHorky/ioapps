@@ -6,3 +6,11 @@ IO profiler is a GUI application that parses a list of IO system calls (currentl
 
 = Details =
 See [IOProfilerScreenshots screenshots].
+
+= Usage = 
+  * trace the application of interest using this command
+{{{
+strace -q -a1 -s0 -f -tttT -oOUT_FILE -e trace=file,desc,process,socket APPLICATION ARGUMENTS
+}}}
+  * _optionally_ [IOReplayConvert convert] the OUT_FILE to a binary form
+  * run ioprofiler.py and load the OUT_FILE or a converted binary form OUT_FILE.bin
