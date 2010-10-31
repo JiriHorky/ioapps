@@ -1,0 +1,5 @@
+#summary Screenshots of IOProfiler
+=Main application window=
+http://elvys.farm.particle.cz/gui1.png
+=Detailed information about access to a file=
+http://elvys.farm.particle.cz/gui2.png
