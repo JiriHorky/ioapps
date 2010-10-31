@@ -19,10 +19,6 @@ Usage: ioreplay \fB\-S\fR \fB\-f\fR <file> [\-v]
 .IP
 displays some statistics about syscalls recorded in <file> (must be in strace format)
 .PP
-Usage: ioreplay \fB\-l\fR \fB\-f\fR <file> [\-F <format>] [\-i <file>] [\-m <file>] [\-v]
-.IP
-lists all files to which access was recorded in file <file>.
-.PP
 Usage: ioreplay \fB\-C\fR \fB\-f\fR <file> [\-F <format>] [\-i <file>] [\-m <file>] [\-v]
 .IP
 checks whether local enviroment is ready for replaying traces recorded in <file>.
@@ -54,10 +50,6 @@ prints this message
 .TP
 \fB\-i\fR \fB\-\-ignore\fR <file> sets file containing names which we should not touch during
 replaying. I.e. no syscall operation will be performed on given file.
-.TP
-\fB\-l\fR \fB\-\-list\fR
-displays filenames of successful opens, unlinks and mkdirs.
-Useful when generating files for \fB\-i\fR and \fB\-m\fR.
 .TP
 \fB\-m\fR \fB\-\-map\fR <file>
 sets containing file names mapping. When opening file,
