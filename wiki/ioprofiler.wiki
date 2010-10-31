@@ -12,5 +12,5 @@ See [IOProfilerScreenshots screenshots].
 {{{
 strace -q -a1 -s0 -f -tttT -oOUT_FILE -e trace=file,desc,process,socket APPLICATION ARGUMENTS
 }}}
-  * _optionally_ [IOReplayConvert convert] the OUT_FILE to a binary form
+  * _optionally_ [IOReplayConvert convert] the OUT_FILE to a binary form using [ioreplay]
   * run ioprofiler.py and load the OUT_FILE or a converted binary form OUT_FILE.bin
