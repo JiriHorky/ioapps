@@ -96,6 +96,14 @@ void simulate_init(int mode) {
  */
 
 void simulate_finish() {
+	if (sim_map_read == NULL) {
+		ERRORPRINTF("Sim_map_read already freed. Double finish?%s", "\n");
+		return;
+	}
+	if (sim_map_write == NULL) {
+		ERRORPRINTF("Sim_map_write already freed. Double finish?%s", "\n");
+		return;
+	}
 	hash_table_destroy(sim_map_read);
 	hash_table_destroy(sim_map_write);
 	
