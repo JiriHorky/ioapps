@@ -15,5 +15,5 @@ setup(name="ioprofiler",
 										sources = ["ioprofilermodule.c", "../in_common.c", "../in_binary.c", "../in_strace.c", "../adt/list.c", 
 											"../adt/hash_table.c", "../namemap.c", "../simulate.c", "../replicate.c", "../fdmap.c", "../stats.c", "../simfs.c", "../adt/fs_trie.c"],
 										include_dirs = ['../'])],
-		py_modules = [ 'grapher', 'ioprofiler' ]
+		py_modules = [ 'grapher' ]
 		)

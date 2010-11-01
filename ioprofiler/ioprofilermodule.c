@@ -79,7 +79,7 @@ static PyObject * init_items_strace(PyObject *self, PyObject *args) {
 		return NULL;
 	}
 
-	/* The ':init_items_binary' is for error messages */
+	/* The ':init_items_strace' is for error messages */
 	if (!PyArg_ParseTuple(args, "s:init_items_strace", &filename))
 		return NULL;
 	
