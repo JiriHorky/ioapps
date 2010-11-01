@@ -7,7 +7,7 @@ all:
 
 install:
 	python setup.py install
-	$(INSTALL) ioprofiler.py $(TARGET_PATH)
+	$(INSTALL) ioprofiler.py $(TARGET_PATH)/ioprofiler
 
 clean:
 	python setup.py clean
