@@ -248,8 +248,9 @@ static PyObject * free_items(PyObject *self, PyObject *args) {
 }
 
 
-void finish() {
+static PyObject * finish(PyObject *self, PyObject *args) {
 	simulate_finish();
+	return Py_None;
 }
 
 /* A list of all the methods defined by this module. */
