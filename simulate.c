@@ -113,6 +113,7 @@ void simulate_finish() {
 	sim_map_read = NULL;
 	sim_map_write = NULL;
 
+	DEBUGPRINTF("going to finish simfs%s","\n");
 	simfs_finish();
 }
 

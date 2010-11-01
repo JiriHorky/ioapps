@@ -570,20 +570,19 @@ class CentralWidget(QWidget):
         else:
             ioapps.init_items_strace(fileName.toLocal8Bit().data());
         
-        ioapps.simulate();
-        ioapps.free_items();
-
+        ioapps.simulate();        
+        ioapps.free_items();        
+        
         reads = ioapps.get_reads()
-        writes = ioapps.get_writes()
+        writes = ioapps.get_writes()        
         self.dict = {}
         self.dict[self.READS] = reads;
         self.dict[self.WRITES] = writes;
         self.dataHolder.setData(self.dict)                                          
-        self.__showTable()
-        
+        self.__showTable()        
         self.tableW.recomputeData()
         self.filter.rowsRemoved.connect(self.tableW.recomputeData)        
-        self.filter.rowsInserted.connect(self.tableW.recomputeData)        
+        self.filter.rowsInserted.connect(self.tableW.recomputeData)                    
         
     def __showTable(self):        
         if not self.fileName:
