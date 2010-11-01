@@ -31,8 +31,8 @@ PyObject * read_dict_g = NULL;
 PyObject * write_dict_g = NULL;
 
 /* The module doc string */
-PyDoc_STRVAR(ioprofiler__doc__,
-"Repio module. It benefits from ioprofiler C program (loading, normalizing functions).");
+PyDoc_STRVAR(ioapps__doc__,
+"Repio module. It benefits from ioapps C program (loading, normalizing functions).");
 
 /* The function doc strings */
 PyDoc_STRVAR(init_items_bin__doc__,
@@ -246,7 +246,7 @@ void finish() {
 /* "py_iterate_point" is the name of the C function handling the Python call */
 /* "METH_VARGS" tells Python how to call the handler */
 /* The {NULL, NULL} entry indicates the end of the method definitions */
-static PyMethodDef ioprofiler_methods[] = {
+static PyMethodDef ioapps_methods[] = {
 	{"init_items_bin",  init_items_bin, METH_VARARGS, init_items_bin__doc__},
 	{"init_items_strace",  init_items_strace, METH_VARARGS, init_items_strace__doc__},
 	{"free_items",  free_items, METH_VARARGS, free_items__doc__},
@@ -262,7 +262,7 @@ static PyMethodDef ioprofiler_methods[] = {
 /* "initmandelbrot".  The PyMODINIT_FUNC helps with portability */
 /* across operating systems and between C and C++ compilers */
 
-PyMODINIT_FUNC initioprofiler(void) {
+PyMODINIT_FUNC initioapps(void) {
 	/* There have been several InitModule functions over time */
-	Py_InitModule3("ioprofiler", ioprofiler_methods, ioprofiler__doc__);
+	Py_InitModule3("ioapps", ioapps_methods, ioapps__doc__);
 }

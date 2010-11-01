@@ -31,7 +31,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 from matplotlib.figure import Figure
 import numpy as np
-import ioprofiler
+import ioapps
 import getopt
 #import cProfile
 from grapher import *
@@ -555,15 +555,15 @@ class CentralWidget(QWidget):
     def newFileOpened(self, fileName):
         self.fileName = fileName
         if fileName.endsWith(".bin"):
-            ioprofiler.init_items_bin(fileName.toLocal8Bit().data());
+            ioapps.init_items_bin(fileName.toLocal8Bit().data());
         else:
-            ioprofiler.init_items_strace(fileName.toLocal8Bit().data());
+            ioapps.init_items_strace(fileName.toLocal8Bit().data());
         
-        ioprofiler.simulate();
-        ioprofiler.free_items();
+        ioapps.simulate();
+        ioapps.free_items();
 
-        reads = ioprofiler.get_reads()
-        writes = ioprofiler.get_writes()
+        reads = ioapps.get_reads()
+        writes = ioapps.get_writes()
         self.dict = {}
         self.dict[self.READS] = reads;
         self.dict[self.WRITES] = writes;
