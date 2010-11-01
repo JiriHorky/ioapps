@@ -570,17 +570,13 @@ class CentralWidget(QWidget):
         self.dataHolder.setData(self.dict)                                          
         self.__showTable()
         
+        self.tableW.recomputeData()
         self.filter.rowsRemoved.connect(self.tableW.recomputeData)        
         self.filter.rowsInserted.connect(self.tableW.recomputeData)        
         
     def __showTable(self):        
         if not self.fileName:
-            return
-        
-        if not self.showing == None:                      
-            self.model.clear()
-            self.showing = None    
-            self.view.setModel(None) #detach model completely for performance reasons?            
+            return            
             
         if self.readRadioButton.isChecked():
             if self.showing == self.READS: #already showing reads
@@ -592,14 +588,27 @@ class CentralWidget(QWidget):
                 return
             self.showing = self.WRITES            
             sumDict = self.dataHolder.getSummary(self.WRITES)
+        
+        model = None
+            
+        if not self.showing == None:
+            model = self.filter.sourceModel()
+            self.filter.setSourceModel(None) #for performance reasons
+            self.view.setModel(None) #detach model completely for performance reasons?                      
+            self.model.clear()
+            self.showing = None              
                       
         for k,v in sumDict.iteritems():
             list = [k] + v
             self.model.addRow(list)
+                
+        if self.filter.sourceModel() == None:
+            self.filter.setSourceModel(model)
         
         if self.view.model() == None:
             self.view.setModel(self.filter)            
-            
+        
+        self.tableW.recomputeData()
         
 
 class MainWindow(QMainWindow):
@@ -704,7 +713,7 @@ if __name__ == "__main__":
     main = MainWindow()
     main.show()
     app.exec_()
-#    cProfile.run('app.exec_()', '/tmp/profile')
+    #cProfile.run('app.exec_()', '/tmp/profile')
     sys.exit(0)
     sys.exit(app.exec_())
     
