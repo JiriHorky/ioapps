@@ -553,6 +553,17 @@ class CentralWidget(QWidget):
         self.dialogs.remove(dial)                
         
     def newFileOpened(self, fileName):
+        if not self.fileName == None:
+            model = self.filter.sourceModel(); # detach for performance reasons
+            modelView = self.view.model();        
+            self.filter.setSourceModel(None)
+            self.view.setModel(None)
+            self.model.clear()  #clear
+            self.filter.setSourceModel(model)
+            self.view.setModel(modelView) # attach again
+            ioapps.finish()
+                        
+             
         self.fileName = fileName
         if fileName.endsWith(".bin"):
             ioapps.init_items_bin(fileName.toLocal8Bit().data());

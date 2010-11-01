@@ -41,8 +41,20 @@ PyDoc_STRVAR(init_items_bin__doc__,
 PyDoc_STRVAR(init_items_strace__doc__,
 		"Arguments: filename. Loads syscalls from file in strace form. Sets context for other calls.");
 
+PyDoc_STRVAR(simulate__doc__,
+		"Arguments: none. Prepares structures for get_reads and get_writes functions.");
+
 PyDoc_STRVAR(free_items__doc__,
 		"Arguments: none. Remove previously allocated items.");
+
+PyDoc_STRVAR(get_reads__doc__,
+		"Arguments: none. Return a list of reads per file.");
+
+PyDoc_STRVAR(get_writes__doc__,
+		"Arguments: none. Return a list of writes per file.");
+
+PyDoc_STRVAR(finish__doc__,
+		"Arguments: none. Deallocates all stuctures.");
 
 static PyObject * init_items_bin(PyObject *self, PyObject *args) {
 	char * filename;
@@ -235,11 +247,10 @@ static PyObject * free_items(PyObject *self, PyObject *args) {
 	return Py_None;
 }
 
-/*
+
 void finish() {
 	simulate_finish();
 }
-*/
 
 /* A list of all the methods defined by this module. */
 /* "iterate_point" is the name seen inside of Python */
@@ -250,9 +261,10 @@ static PyMethodDef ioapps_methods[] = {
 	{"init_items_bin",  init_items_bin, METH_VARARGS, init_items_bin__doc__},
 	{"init_items_strace",  init_items_strace, METH_VARARGS, init_items_strace__doc__},
 	{"free_items",  free_items, METH_VARARGS, free_items__doc__},
-	{"simulate",  simulate, METH_VARARGS, free_items__doc__},
-	{"get_reads",  get_reads, METH_VARARGS, free_items__doc__},
-	{"get_writes",  get_writes, METH_VARARGS, free_items__doc__},
+	{"simulate",  simulate, METH_VARARGS, simulate__doc__},
+	{"finish",  finish, METH_VARARGS, finish__doc__},
+	{"get_reads",  get_reads, METH_VARARGS, get_reads__doc__},
+	{"get_writes",  get_writes, METH_VARARGS, get_writes__doc__},
 	{NULL, NULL}      /* sentinel */
 };
 
