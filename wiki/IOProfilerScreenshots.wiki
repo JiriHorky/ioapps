@@ -1,8 +1,12 @@
 #summary Screenshots of IOProfiler
 =Main application window=
 http://elvys.farm.particle.cz/gui1.png
+
 =Detailed information about access to a file=
+The plot shown consists of thousand of lines - each line represents one read request. One can zoom in to see details. 
+There is a list of all read requests on the left. The selected reads in the list can be highlighted in the plot. 
 http://elvys.farm.particle.cz/gui2.png
+
 =Histograms=
 http://elvys.farm.particle.cz/gui3.png
 http://elvys.farm.particle.cz/gui4.png
