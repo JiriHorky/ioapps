@@ -46,10 +46,13 @@ and then
 {{{
 make install_profiler
 }}}
+
+This will install ioapps python module and ioprofiler.py to your system. 
 ===From RPM package===
 TO BE DONE
 
 This will install ioapps python module and ioprofiler.py to your system. 
+
 
 = Architecture = 
 IOProfiler is mainly written in Python, using PyQt4 as a GUI framework and Matplotlib library for plotting.
