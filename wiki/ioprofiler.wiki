@@ -49,7 +49,7 @@ This will install ioapps python module and ioprofiler.py to your system.
 = Architecture = 
 IOProfiler is mainly written in Python, using PyQt4 as a GUI framework and Matplotlib library for plotting.
 
-IOProfiler takes advantage of an intelligent file descriptors handling written in C originally for the [ioreplay IOreplay]. The code is converted to the python module called `ioapps`. See [FileDescriptorsHandling] for more information.
+IOProfiler takes advantage of an intelligent file descriptors handling written in C originally for the [ioreplay IOreplay]. The code is converted to the python module called `ioapps`.
 
 = Drawbacks =
   * Speed 
