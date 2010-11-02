@@ -16,10 +16,15 @@ Instead, you can record all IO operations that your application does. Then, on a
 
 = Features =
   * Zero dependencies
-  * Ability to trace *all children processes* spawned by the traced parent process. You *can* trace complicated jobs that execute many child scripts.
-  * Intelligent and fast file descriptor-to-file name mapping, written in C for performance
-   * this includes the previous bullet
-   * this includes handling of {{{ dup, dup2, dup3, pipe, socket, clone }}} system calls.
+  * Ability to replay complicated jobs that consists of *children processes* spawned by the traced parent process.
+  * 20 system calls replicated, see [SystemCallList list].
+  * intelligent checking of environment prior to replaying the traces
+  * possibility to define mapping of original file names to new one
+  * possibility to define files that should be ignored (i.e. accesses to these files will not be replayed)
+  * multiple replay time [#TimeModes modes].
+  * precise timing of calls delivery based on instruction count register
+  * conversion of recorded traces to more suitable binary format
+  * possibility to scale think-times (delays between individual calls) 
 
 = Usage = 
  == Record traces ==
@@ -27,11 +32,71 @@ Instead, you can record all IO operations that your application does. Then, on a
 {{{
 strace -q -a1 -s0 -f -tttT -oOUT_FILE -e trace=file,desc,process,socket APPLICATION ARGUMENTS
 }}}
-  * write down the time overhead the application had under strace in comparison with a normal run
+  * write down the time overhead the application had under strace to compare with a normal run
   * _optionally_ [IOReplayConvert convert] the OUT_FILE to a binary form using [ioreplay]
  == Prepare environment ==
+Once you have the recorded traces, you must prepare environment in such a way that it contains the files of at least the same size. In other words, all calls that previously succeeded/failed should succeed/fail again. 
+
+ === Define map file ===
+_Optional_. You can use *mapfile* that define mapping between original file name and a new file name. All calls that were performed on the original file name will now be performed on the new name. It applies for both, reads and writes.
+Format of a mapfile is simple. It assumes that there aren't any spaces in file names (to be improved). Suppose you want to test Lustre filesystem and you obtained traces on GPFS:
+{{{
+#all lines starting with hash are ignored. Format is simple:
+#original_name new_name
+/gpfs/DATAFILE1.data /lustre/data/DATAFILE1.data
+/gpfs/DATAFILE2.data /lustre/data/DATAFILE2.data
+}}}
+
+ === Define ignore file ===
+_Optional_. You can use *ignore file* that define list of files that will not be accessed at all. They will be simply ignored. It applies for both, reads and writes.
+Suppose we only want to test replay accesses to data files, not to the libraries etc.
+{{{
+#all lines starting with hash are ignored. Format is simple:
+#original_name
+/lib64/liba.so
+/lib64/libb.so
+#and so on...
+}}}
+
+ === Check the environment ===
+`ioreplay` has a possibility to check whether replaying will succeed without any error or not. It is, again, whether all succeeded/failed calls will succeed/fail now. It can take into account the mapfile and the ignore file.
+
+It reports every problem that can be:
+  * a missing file. In this case a minimum file size in bytes is reported as well.
+  * insufficient file size
+  * existing file that should be deleted (i.e. previous access call failed)
+
+Every problem is reported only once, i.e. if a file is missing and some data are read from the file, it only reports failed `open()` call and not the failed `read()` calls, as they wouldn't appear if the file existed. In fact, the `ioreplay` constructs its own in-memory image of the file system based on the actual file system and missing files/directories during the check process. This way, only roots of problems are reported.
+
+Although quite intelligent, the check isn't perfect. It doesn't take into account any permission problems that could arise. In fact, there aren't enough information for reliable checking of such problems in the recorded trace file.
+
+run it as:
+
+{{{
+ioreplay -C -f strace.output -m mapfile -i ignorefile
+}}}
+or, in case of the binary format
+{{{
+ioreplay -C -f strace.bin -F bin -m mapfile -i ignorefile
+}}}
+
+You can omit -m and -i options.
+
  == Replay ==
+Once you are satisfied with the check result, you can replay the traces:
+{{{
+ioreplay -r -f strace.output -m mapfile -i ignorefile -t diff
+}}}
+or 
+{{{
+ioreplay -r -f strace.bin -F bin -m mapfile -i ignorefile -t diff
+}}}
+
+See time [#TimeModes modes] for multiple options for time handling during replaying.
+See man page for all options available. 
+
  == Verify scaling ==
+In order to trust that the replaying is representative, you should verify that it scales similarly to the original application. To do that, you should measure time spent by original application and by replaying. If you have a chance to run both on a different hardware, do it, and measure the differences prior using it as a trusted benchmark.
 
 = Installation =
 ==Dependencies==
@@ -58,5 +123,12 @@ This will install ioreplay binary and manual page to your system.
 = Architecture = 
 IOreplay is completely written in C.
 
+= TimeModes =
+`ioreplay` provides three time modes in which IO calls can be replayed. 
+  * *diff* - default mode. Keeps delays between individual IO calls same as in the original run. This should be the most representative.
+  * *asap* - in this mode, the IO calls are made as fast as possible. It can be a option if you have a long running job and you sacrifice some precision. Beware that obtained results can differ A LOT when you run multiple instances of the same job.
+  * *exact - Try to make calls in same time relative from start of the program
+
+In every case, sleeping is implemented as active waiting with periodical checking of instruction count register.
 = Drawbacks =
   * TO BE WRITTEN
