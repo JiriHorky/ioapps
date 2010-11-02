@@ -12,8 +12,8 @@ Besides many advantages, usage of `strace` as a source of traces has its limitat
   * Very easy to use
   * Ability to trace *all children processes* spawned by the traced parent process. You *can* trace complicated jobs that execute many child scripts.
   * Intelligent and fast file descriptor-to-file name mapping, written in C for performance
-    - this includes the previous bullet
-    - this includes handling of {{{ dup, dup2, dup3, pipe, socket, clone }}} system calls.
+   - this includes the previous bullet
+   - this includes handling of {{{ dup, dup2, dup3, pipe, socket, clone }}} system calls.
   * Zoomable, easy-to-save plots (both in vector and scalar format)
 
 = Details =
