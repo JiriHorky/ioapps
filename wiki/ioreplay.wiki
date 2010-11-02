@@ -5,6 +5,8 @@
 
 *ioreplay* is a tool for replaying IO traces. It is capable of very precise simulation of the original, traced application by issuing the same IO system calls in the same time. It is mainly useful as a standalone benchmark tool in situations, where running the original application is not possible (i.e. it requires a complicated system setup, licenses problems, input data problems etc.) or desirable. 
 
+The tool runs under Linux.
+
 = Use case =
 
 Imagine you have a complex application X that is quite IO intensive. It requires many libraries and it is rather hard to install, not to mention it processes data files that are not publicly available. You wonder whether using SSD disks instead of traditional hard drives could improve the performance of your application. 
