@@ -8,7 +8,7 @@ Storing and also processing text output from strace command is inefficient. For 
   * the binary format is a default format for [ioprofiler] (but it can also open pure strace outputs)
 
 = How =
-To convert file _strace.out_ to the binary file called _strace.bin, run:
+To convert file _strace.out_ to the binary file called _strace.bin_, run:
 {{{
 ioreplay -c -f strace.out -o strace.bin
 }}}
