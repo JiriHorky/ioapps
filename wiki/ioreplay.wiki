@@ -21,7 +21,7 @@ Instead, you can record all IO operations that your application does. Then, on a
   * intelligent checking of environment prior to replaying the traces
   * possibility to define mapping of original file names to new one
   * possibility to define files that should be ignored (i.e. accesses to these files will not be replayed)
-  * multiple replay time [#TimeModes modes].
+  * multiple replay time [#Time_modes modes].
   * precise timing of calls delivery based on instruction count register
   * conversion of recorded traces to more suitable binary format
   * possibility to scale think-times (delays between individual calls) 
@@ -92,7 +92,7 @@ or
 ioreplay -r -f strace.bin -F bin -m mapfile -i ignorefile -t diff
 }}}
 
-See time [#TimeModes modes] for multiple options for time handling during replaying.
+See time [#Time_modes modes] for multiple options for time handling during replaying.
 See man page for all options available. 
 
  == Verify scaling ==
@@ -103,7 +103,7 @@ In order to trust that the replaying is representative, you should verify that i
 None.
 ==Installation==
 ===From source===
-Grab source from svn and then:
+Grab the source tarball from Downloads section or from svn and then:
 
 To install just the IOreplay and not the whole IOapps suite (see [IOAppsInstallation this] for details), run following commands:
 {{{
@@ -120,9 +120,6 @@ TO BE DONE
 
 This will install ioreplay binary and manual page to your system.
 
-= Architecture = 
-IOreplay is completely written in C.
-
 = Time Modes =
 `ioreplay` provides three time modes in which IO calls can be replayed. 
   * *diff* - default mode. Keeps delays between individual IO calls same as in the original run. This should be the most representative time mode.
@@ -130,5 +127,19 @@ IOreplay is completely written in C.
   * *exact* - Try to make calls in same time relative from start of the program.
 
 In every case, sleeping is implemented as active waiting with periodical checking of instruction count register.
+
+Lengths of the delays between calls (think times) can be scaled using -s switch.
+
+= Architecture = 
+IOreplay is completely written in C.
+
+= How precise can replaying be? =
+Well, it depends. It *can* behave almost the same as the original application but it can also be completely off. You have to try it on your application. Main aspects affecting precision:
+ * Recording of traces. In some cases, the recording itself can skew timing by the factor of 100%. See [StraceLimitation why]. In that case, you can play with -s option to get quite reasonable behavior.
+ * Calls delivery - given the multitask nature of Linux systems, it is not possible to guarantee issuing of IO calls in the exactly same time as in the previous run.
+ * Simultaneous IO calls. They are serialized, as the `ioreplay` is single-threaded. If your application does majority of its IO calls in the same time, `ioreplay` is probably not an option for you. Please let me know name of the application in such case.
+
+Please contact the author if you can not achieve accuracy within 10% of the original application. 
+
 = Drawbacks =
-  * TO BE WRITTEN
+  * Single threaded
