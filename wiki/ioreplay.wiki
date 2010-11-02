@@ -133,13 +133,24 @@ Lengths of the delays between calls (think times) can be scaled using -s switch.
 = Architecture = 
 IOreplay is completely written in C.
 
-= How precise can replaying be? =
+= How precise can the replaying be? =
 Well, it depends. It *can* behave almost the same as the original application but it can also be completely off. You have to try it on your application. Main aspects affecting precision:
  * Recording of traces. In some cases, the recording itself can skew timing by the factor of 100%. See [StraceLimitation why]. In that case, you can play with -s option to get quite reasonable behavior.
  * Calls delivery - given the multitask nature of Linux systems, it is not possible to guarantee issuing of IO calls in the exactly same time as in the previous run.
  * Simultaneous IO calls. They are serialized, as the `ioreplay` is single-threaded. If your application does majority of its IO calls in the same time, `ioreplay` is probably not an option for you. Please let me know name of the application in such case.
 
 Please contact the author if you can not achieve accuracy within 10% of the original application. 
+
+== Example ==
+The scaling of `ioreplay` was tested using an [http://atlas.web.cern.ch/Atlas/ ATLAS ] analysis application. The job processed physicist data in order to find interesting events in them.
+The application accessed 89 files, from which 9 were data files. Each data file had approximately 1GB, and around 250MB were read from each file, mostly sequentially but still with gaps. In total, the job read 2160 from hard drive, spending totally 42 seconds in 7332 read requests.
+The Overhead of strace during recording was within 2%.
+Used hardware: 2x Intel E5520@2.27GHz = eight cores in total, 16GB RAM, 300GB SAS 15k RPM hdd (Seagate ST3300656SS).
+We tried to run up to twelve instances of the original job and `ioreplay` (each one accessing its own copy of data files) on the node, measuring the difference.
+
+http://elvys.farm.particle.cz/scaling1.png
+
+As can be seen on the plot, the `ioreplay` performed very well (within 4%) until we overloaded the node with more than eight jobs (remember, the node had only 8 cores). After that, the original application start to run slower than `ioreplay`. However, this was well expected as the `ioreplay` was run in `diff` time [#Time_mode mode], so it still kept the delays as if the node wasn't overloaded. On the other hand, the original application did actual computing so it started to run slower as there were no free CPU cycles.
 
 = Drawbacks =
   * Single threaded
