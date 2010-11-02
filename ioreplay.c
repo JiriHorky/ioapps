@@ -69,33 +69,34 @@ printf("Usage: %s -S -f <file> [-v]\n", name);
 printf("   displays some statistics about syscalls recorded in <file> (must be in " FORMAT_STRACE " format)\n\n");
 printf("Usage: %s -C -f <file> [-F <format>] [-i <file>] [-m <file>] [-v]\n", name);
 printf("   checks whether local enviroment is ready for replaying traces recorded in <file>.\n\n");
-printf("Usage: %s -r -f <file> [-F <format>] [-t <mode>] [-b <number>] [-i <file>] [-m <file>] [-v]\n", name);
+printf("Usage: %s -r -f <file> [-F <format>] [-t <mode>] [-s <factor>] [-b <number>] [-i <file>] [-m <file>] [-v]\n", name);
 printf("   replicates traces recorded in <file>. Use -C prior to running this.\n");
 printf("\n\
- -b --bind <number> bind replicating process to processor number <number>\n\
- -c --convert       file to binary form, see also -o\n\
- -C --check         checks that all operations recorded in the file specied by -f will\n\
-                    succeed (ie. will result in same return code).\n\
-                    It takes -i and -m into account. See also -p.\n\
- -f --file <file>   sets filename to <file>\n\
- -F --format <fmt>  specifies input format of the file.\n\
-                    Options: " FORMAT_STRACE ", " FORMAT_BIN ".\n\
-                    Check README for details. Default is " FORMAT_STRACE ".\n\
- -h --help          prints this message\n\
- -i --ignore <file> sets file containing names which we should not touch during\n\
-                    replaying. I.e. no syscall operation will be performed on given file.\n\
- -m --map <file>    sets containing file names mapping. When opening file,\n\
-                    if there is mapping for it, it will open mapped file instead.\n\
-                    See README for more information.\n\
- -o --output <file> output filename when converting. Default: strace.bin.\n\
- -p --prepare       will prepare all files accesses recorded in file specified by -f,\n\
-                    so every IO operation will return with same exit code as in original\n\
-                    application. See also -i and/or -m parameters.\n\
-                    Do nothing at the moment.\n\
- -r --replicate     will replicate every operation stored in file specified by -f\n\
- -S --stats         generate stats when processing the file. Can be combined with other\n\
-                    options.\n\
- -t --timing        sets timing mode for replication. Options available:\n\
+ -b --bind <number>  bind replicating process to processor number <number>\n\
+ -c --convert        file to binary form, see also -o\n\
+ -C --check          checks that all operations recorded in the file specied by -f will\n\
+                     succeed (ie. will result in same return code).\n\
+                     It takes -i and -m into account. See also -p.\n\
+ -f --file <file>    sets filename to <file>\n\
+ -F --format <fmt>   specifies input format of the file.\n\
+                     Options: " FORMAT_STRACE ", " FORMAT_BIN ".\n\
+                     Check README for details. Default is " FORMAT_STRACE ".\n\
+ -h --help           prints this message\n\
+ -i --ignore <file>  sets file containing names which we should not touch during\n\
+                     replaying. I.e. no syscall operation will be performed on given file.\n\
+ -m --map <file>     sets containing file names mapping. When opening file,\n\
+                     if there is mapping for it, it will open mapped file instead.\n\
+                     See README for more information.\n\
+ -o --output <file>  output filename when converting. Default: strace.bin.\n\
+ -p --prepare        will prepare all files accesses recorded in file specified by -f,\n\
+                     so every IO operation will return with same exit code as in original\n\
+                     application. See also -i and/or -m parameters.\n\
+                     Do nothing at the moment.\n\
+ -r --replicate      will replicate every operation stored in file specified by -f\n\
+ -s --scale <factor> scales delays between calls by the factor <factor>. Used with -r.\n\
+ -S --stats          generate stats when processing the file. Can be combined with other\n\
+                     options.\n\
+ -t --timing         sets timing mode for replication. Options available:\n\
                       asap  - default mode, makes calls one just after another.\n\
                       diff  - makes sure that gaps between calls are the same as in the original run.\n\
                       exact - makes sure that calls are (approximately) done in the same time as in the original run\n\
