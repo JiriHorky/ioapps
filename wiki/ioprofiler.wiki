@@ -1,6 +1,6 @@
 #summary ioprofiler - IO profiler
 
-<wiki:toc max_depth="2" />
+<wiki:toc max_depth="3" />
 
 = Introduction =
 
@@ -35,6 +35,9 @@ IOProfiler depends on the following application and libraries:
   * matplotlib
 
 ==Installation==
+===From source===
+Grab source from svn and then:
+
 To install just the IOProfiler and not the whole IOapps suite (see [IOAppsInstallation this] for details), run following commands:
 {{{
 make profiler
@@ -43,6 +46,8 @@ and then
 {{{
 make install_profiler
 }}}
+===From RPM package===
+TO BE DONE
 
 This will install ioapps python module and ioprofiler.py to your system. 
 
