@@ -3,3 +3,7 @@
 http://elvys.farm.particle.cz/gui1.png
 =Detailed information about access to a file=
 http://elvys.farm.particle.cz/gui2.png
+=Histograms=
+http://elvys.farm.particle.cz/gui3.png
+http://elvys.farm.particle.cz/gui4.png
+http://elvys.farm.particle.cz/gui5.png
