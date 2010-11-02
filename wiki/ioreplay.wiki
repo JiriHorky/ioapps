@@ -126,7 +126,7 @@ This will install ioreplay binary and manual page to your system.
 `ioreplay` provides three time modes in which IO calls can be replayed. 
   * *diff* - default mode. Keeps delays between individual IO calls same as in the original run. This should be the most representative time mode.
   * *asap* - in this mode, the IO calls are made as fast as possible. It can be a option if you have a long running job and you sacrifice some precision. Beware that obtained results can differ A LOT when you run multiple instances of the same job.
-  * *exact* - Try to make calls in same time relative from start of the program.
+  * *exact* - Try to make calls in same time relatively from start of the program.
 
 In every case, sleeping is implemented as active waiting with periodical checking of instruction count register.
 
