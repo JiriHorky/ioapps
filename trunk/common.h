@@ -52,7 +52,7 @@
 #define MAX_DATA (1024*1024*64)
 #define MAX_TIME_STRING 20
 #define MAX_PARENT_IDS 20
-#define VERSION "1.0b"
+#define VERSION "1.0"
 
 #define SIM_MASK 0x1
 #define REP_MASK 0x2

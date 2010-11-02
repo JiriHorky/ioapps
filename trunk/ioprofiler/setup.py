@@ -3,7 +3,7 @@
 from distutils.core import setup, Extension
 
 setup(name="ioprofiler",
-		version="1.0b",
+		version="1.0",
 		description="IO profiler, part of IOApps",
 		author="Jiri Horky",
 		author_email="jiri.horky@gmail.com",
