@@ -29,7 +29,7 @@ strace -q -a1 -s0 -f -tttT -oOUT_FILE -e trace=file,desc,process,socket APPLICAT
 
 = Installation =
 ==Dependencies==
-IOProfiler depends on following application and libraries:
+IOProfiler depends on the following application and libraries:
   * python2.6
   * PyQt4
   * matplotlib
