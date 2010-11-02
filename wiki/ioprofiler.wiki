@@ -1,11 +1,23 @@
 #summary ioprofiler - IO profiler
 
+<wiki:toc max_depth="2" />
+
 = Introduction =
 
-IO profiler is a GUI application that parses a list of IO system calls (currently recorded by strace) issued by an application and reports useful information about which files were accessed, when they were accessed, which parts of them, how fast etc.
+IOprofiler is a GUI application that parses a list of IO system calls (currently recorded by `strace`) issued by an application and reports useful information about which files were accessed, when they were accessed, which parts of them, how fast etc.
+
+Besides many advantages, usage of `strace` as a source of traces has its limitation. Please read [StraceLimitation this] to review them.
+
+= Features =
+  * Very easy to use
+  * Ability to trace *all children processes* spawned by the traced parent process. You *can* trace complicated jobs that execute many child scripts.
+  * Intelligent and fast file descriptor-to-file name mapping, written in C for performance
+    - this includes the previous bullet
+    - this includes handling of {{{ dup, dup2, dup3, pipe, socket, clone }}} system calls.
+  * Zoomable, easy-to-save plots (both in vector and scalar format)
 
 = Details =
-See [IOProfilerScreenshots screenshots].
+A picture is worth a thousand words, so please see [IOProfilerScreenshots screenshots].
 
 = Usage = 
   * trace the application of interest using this command
@@ -14,3 +26,35 @@ strace -q -a1 -s0 -f -tttT -oOUT_FILE -e trace=file,desc,process,socket APPLICAT
 }}}
   * _optionally_ [IOReplayConvert convert] the OUT_FILE to a binary form using [ioreplay]
   * run ioprofiler.py and load the OUT_FILE or a converted binary file OUT_FILE.bin
+
+= Installation =
+==Dependencies==
+IOProfiler depends on following application and libraries:
+  * python2.6
+  * PyQt4
+  * matplotlib
+
+==Installation==
+To install just the IOProfiler and not the whole IOapps suite (see [IOAppsInstallation this] for details), run following commands:
+{{{
+make profiler
+}}}
+and then
+{{{
+make install_profiler
+}}}
+
+This will install ioapps python module and ioprofiler.py to your system. 
+
+= Architecture = 
+IOProfiler is mainly written in Python, using PyQt4 as a GUI framework and Matplotlib library for plotting.
+
+IOProfiler takes advantage of an intelligent file descriptors handling written in C originally for the [ioreplay IOreplay]. The code is converted to the python module called `ioapps`. See [FileDescriptorsHandling] for more information.
+
+= Drawbacks =
+  * Speed - since the application and, most importantly, the plotting is written in Python, it is a bit slower than a native application. This is not noticeable unless you want to process and plot a graph with hundred of thousands lines (read/write requests), which may take minutes. I am not aware of any way how to avoid this.
+
+Please note that the time and memory consuming file parsing is written in C as `ioapps` python module.
+  * Memory consumption -
+    * Again, the Matplotlib library is quite memory hungry in cases one wants a complicated plot with hundred of thousands of lines. It takes approximately 1GB of RAM for every 100 thousands lines to plot.
+    * All recorded traces are kept in memory, because of the way recorded traces are processed. It takes approximately the same amount of memory as the file size of binary form of the recorded data. This is, in fact, negligible in comparison with memory consumption for plotting. This may be improved in the future.
