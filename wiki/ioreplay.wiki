@@ -14,7 +14,7 @@ Imagine you have a complex application X that is quite IO intensive. It requires
 Your colleague (or a vendor) have proposed that he can run a simple benchmark to measure the performance difference on a new hardware he has.
 Because of aforementioned reasons, you can't afford to run the real application. You don't want to use a synthetic benchmark such as _iozone_ or _bonnie++_ (while perfect tools) because they aren't really representative for your workload.
 
-Instead, you can record all IO operations that your application does. Then, on a target test system, you replay them producing the exact same IO workload as the original application.
+Instead, you can record all IO operations that your application does. Then, on a target test system, you replay them producing the same IO workload as the original application.
 
 = Features =
   * Zero dependencies
