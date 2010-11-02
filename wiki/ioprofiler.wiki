@@ -16,7 +16,7 @@ Besides many advantages, usage of `strace` as a source of traces has its limitat
    * this includes handling of {{{ dup, dup2, dup3, pipe, socket, clone }}} system calls.
   * Zoomable, easy-to-save plots (both in vector and scalar format)
 
-= Details =
+= Screenshots =
 A picture is worth a thousand words, so please see [IOProfilerScreenshots screenshots].
 
 = Usage = 
