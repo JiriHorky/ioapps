@@ -97,8 +97,8 @@ printf("\n\
  -S --stats          generate stats when processing the file. Can be combined with other\n\
                      options.\n\
  -t --timing         sets timing mode for replication. Options available:\n\
-                      asap  - default mode, makes calls one just after another.\n\
-                      diff  - makes sure that gaps between calls are the same as in the original run.\n\
+                      diff  - default mode. makes sure that gaps between calls are the same as in the original run.\n\
+                      asap  - makes calls one just after another.\n\
                       exact - makes sure that calls are (approximately) done in the same time as in the original run\n\
                               (relative from start of the application)\n\
  -v --verbose be more verbose (do nothing at the moment)\n\
