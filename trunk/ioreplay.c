@@ -189,11 +189,11 @@ int main(int argc, char * * argv) {
 				break;
 			case 't':
 				if ( ! strcmp(TIME_DIFF_STR, optarg) ) {
-					action |= TIME_DIFF;
+					action = (action & ! TIME_MASK) | TIME_DIFF;
 				} else if ( ! strcmp(TIME_EXACT_STR, optarg) ) {
-					action |= TIME_EXACT;
+					action = (action & ! TIME_MASK) | TIME_EXACT;
 				} else if ( ! strcmp(TIME_ASAP_STR, optarg) ) {
-					action |= TIME_ASAP;
+					action = (action & ! TIME_MASK) | TIME_ASAP;
 				} else {
 					fprintf(stderr, "Unknown timemode specified.\n");
 					exit(-1);
@@ -267,8 +267,11 @@ int main(int argc, char * * argv) {
 		simulate_finish();
 	} else if (action & ACT_REPLICATE) {
 		DEBUGPRINTF("Starting of replicating...%s", "\n");
+		if ( ! (action & TIME_MASK) ) { //time mode not defined
+			action |= TIME_DIFF; //use time diff as default
+		}
 		/// < @todo to change
-		if (replicate(list, cpu, scale, REP_MASK | (action & TIME_MASK), ifilename, mfilename) != 0) {
+		if (replicate(list, cpu, scale, action, ifilename, mfilename) != 0) {
 			ERRORPRINTF("An error occurred during replicating.%s", "\n");
 		}
 	} else {

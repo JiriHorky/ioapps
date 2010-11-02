@@ -87,17 +87,17 @@
 #define TIME_DIFF_STR "diff"
 #define TIME_EXACT 0x100 ///< Try to make calls in same time relative from start of the program
 #define TIME_EXACT_STR "exact"
-#define TIME_ASAP 0x0 ///< default mode, make calls as soon as possible
+#define TIME_ASAP 0x40 ///< make calls as soon as possible
 #define TIME_ASAP_STR "asap"
-#define TIME_MASK 0x180 ///< only TIME_DIFF and TIME_EXACT are taken into account
+#define TIME_MASK 0x1C0
 
 #define ACT_MASK 0x0000007F
-#define ACT_CONVERT 01
-#define ACT_SIMULATE 02
-#define ACT_REPLICATE 010
-#define ACT_STATS 020
-#define ACT_CHECK 040
-#define ACT_PREPARE 0100
+#define ACT_CONVERT 0x1
+#define ACT_SIMULATE 0x2
+#define ACT_REPLICATE 0x4
+#define ACT_STATS 0x8
+#define ACT_CHECK 0x10
+#define ACT_PREPARE 0x20
 
 /** Our own version of struct timeval structure - the reason for it is to make sure
 	it will be of equal size on both 32 and 64bit platforms. It will overflow in some
