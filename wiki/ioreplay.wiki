@@ -1,4 +1,5 @@
 #summary ioreplay - IO traces replayer
+<wiki:toc max_depth="3" />
 
 = Introduction =
 
@@ -13,6 +14,49 @@ Because of aforementioned reasons, you can't afford to run the real application.
 
 Instead, you can record all IO operations that your application does. Then, on a target test system, you replay them producing the exact same IO workload as the original application.
 
-= Details =
+= Features =
+  * Zero dependencies
+  * Ability to trace *all children processes* spawned by the traced parent process. You *can* trace complicated jobs that execute many child scripts.
+  * Intelligent and fast file descriptor-to-file name mapping, written in C for performance
+   * this includes the previous bullet
+   * this includes handling of {{{ dup, dup2, dup3, pipe, socket, clone }}} system calls.
 
-To be written.
+= Usage = 
+ == Obtain traces ==
+  * trace the application of interest using this command
+{{{
+strace -q -a1 -s0 -f -tttT -oOUT_FILE -e trace=file,desc,process,socket APPLICATION ARGUMENTS
+}}}
+  * write down the time overhead the application had under strace in comparison with a normal run
+  * _optionally_ [IOReplayConvert convert] the OUT_FILE to a binary form using [ioreplay]
+ == Prepare environment ==
+ == Replay ==
+ == Verify scaling ==
+
+= Installation =
+==Dependencies==
+None.
+==Installation==
+===From source===
+Grab source from svn and then:
+
+To install just the IOreplay and not the whole IOapps suite (see [IOAppsInstallation this] for details), run following commands:
+{{{
+make replay
+}}}
+and then
+{{{
+make install_replay
+}}}
+
+This will install ioreplay binary and manual page to your system.
+===From RPM package===
+TO BE DONE
+
+This will install ioreplay binary and manual page to your system.
+
+= Architecture = 
+IOreplay is completely written in C.
+
+= Drawbacks =
+  * TO BE WRITTEN
