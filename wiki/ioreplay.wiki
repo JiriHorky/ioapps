@@ -22,7 +22,7 @@ Instead, you can record all IO operations that your application does. Then, on a
    * this includes handling of {{{ dup, dup2, dup3, pipe, socket, clone }}} system calls.
 
 = Usage = 
- == Obtain traces ==
+ == Record traces ==
   * trace the application of interest using this command
 {{{
 strace -q -a1 -s0 -f -tttT -oOUT_FILE -e trace=file,desc,process,socket APPLICATION ARGUMENTS
