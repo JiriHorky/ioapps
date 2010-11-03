@@ -102,7 +102,7 @@ In order to trust that the replaying is representative, you should verify that i
 
 = Installation =
 ==Dependencies==
-None.
+Install `strace` (if you don't have it already) for recording of traces.
 ==Installation==
 ===From source===
 Grab the source tarball from Downloads section or from svn and then:
