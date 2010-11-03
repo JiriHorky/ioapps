@@ -364,6 +364,7 @@ int simfs_stat(stat_op_t * stat_op) {
 				if (simfs_mask & ACT_PREPARE) {
 					///< @todo really create it
 				}
+				rv = SIMFS_ENOENT;
 			} else {
 				rv = 0;
 			}

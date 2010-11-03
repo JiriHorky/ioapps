@@ -969,7 +969,7 @@ void strace_read_unfinished(char * line, hash_table_t * ht) {
 void strace_read_resumed(char * line, list_t * list, hash_table_t * ht) {
 	isyscall_t * isyscall;
 	item_t * item;
-	char buff[MAX_STRING *2];
+	char buff[MAX_STRING *2 + 1];
 	char *s;
 	int pid;
 
