@@ -25,6 +25,7 @@ To ensure even better functionality, these additional system calls should be inc
   * `fstat`
   * `pread`
   * `pwrite`
+  * `rename`
   * `pipe2`
   * `tee`
   * `splice`
