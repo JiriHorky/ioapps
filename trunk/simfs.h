@@ -42,7 +42,7 @@
 
 #define SIMFS_OK 0
 #define SIMFS_PHYS -1
-#define SIMFS_VIRT -1
+#define SIMFS_VIRT -2
 #define SIMFS_ENOENT 1
 #define SIMFS_EENT 2
 

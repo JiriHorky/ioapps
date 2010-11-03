@@ -166,6 +166,9 @@ int namemap_init(char * ifilename, char * mfilename) {
 			if ( line[0] == '#' ) //comment
 				continue;
 
+			nm_item = malloc(sizeof(namemap_item_t));
+			item_init(&nm_item->item);			
+
 			int i = 0;
 			int found_nl = 0;
 			while ( i < MAX_STRING && line[i] != 0) {
