@@ -36,7 +36,7 @@ IOProfiler depends on the following application and libraries:
 
 ==Installation==
 ===From source===
-Grab source from svn and then:
+Download latest tarball from Downloads sections or grab the source from svn and then:
 
 To install just the IOProfiler and not the whole IOapps suite (see [IOAppsInstallation this] for details), run following commands:
 {{{
