@@ -1,0 +1,15 @@
+#summary The list of things that should be improved
+
+Here is the list of enhancements that should be added in the near future:
+
+= IOapps suite =
+
+  * Tracing already running applications ( -p switch for `strace`). In that case, we should investigate /proc/PID/fd links for file descriptors-to-file names mappings. In case of missing information, use some generic string for file name (i.e. `UNKNOWN_FILE1``). Right now, we report an error and ignore all IO calls for calls that have `open` call missing.
+  * Handling of other system calls listed [SystemCallList#TODO_list here].
+  * Use [http://www.benchit.org/wiki/index.php/IOprof IOProf] as alternative list of system calls. It should have lower overhead than `strace`.
+
+= Only IOprofiler =
+  * Try to shrink memory requirements
+
+= Only IOreplay = 
+  * Better syntax support for mapping a and ignore file (see [ioreplay#Define_map_file here].
