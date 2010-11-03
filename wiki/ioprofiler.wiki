@@ -6,7 +6,7 @@
 
 IOprofiler is a GUI application that parses a list of IO system calls (currently recorded by `strace`) issued by an application and reports useful information about which files were accessed, when they were accessed, which parts of them, how fast etc.
 
-Besides many advantages, usage of `strace` as a source of traces has its limitation. Please read [StraceLimitation this] to review them.
+Besides many advantages, usage of `strace` as a source of traces has its limitations. Please read [StraceLimitation strace limitations] to review them.
 
 = Features =
   * Very easy to use
