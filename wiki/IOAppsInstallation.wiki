@@ -1,5 +1,5 @@
 #summary IOapps installations
-
+This page describes how to install the whole `IOapps` suite. If you want to install just part of it, please refer to installation instructions for individual tools ([ioreplay#Installation ioreplay], [ioprofiler#Installation ioprofiler]).
 = Dependencies =
 `IOProfiler` depends on the following application and libraries:
   * python2.6
