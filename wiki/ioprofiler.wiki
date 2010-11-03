@@ -10,6 +10,7 @@ Besides many advantages, usage of `strace` as a source of traces has its limitat
 
 = Features =
   * Very easy to use
+  * 20 system calls processed, see [SystemCallList list]. 
   * Ability to trace *all children processes* spawned by the traced parent process. You *can* trace complicated jobs that execute many child scripts.
   * Intelligent and fast file descriptor-to-file name mapping, written in C for performance
    * this includes handling of {{{ dup, dup2, dup3, pipe, socket, clone }}} system calls.
