@@ -22,10 +22,10 @@ Both [ioreplay] and [ioprofiler] process the list of recorded system calls in or
 = TODO system calls = 
 
 To ensure even better functionality, these additional system calls should be included in the near future:
-  * fstat
-  * pread !
-  * pwrite !
-  * pipe2
-  * tee
-  * splice
-  * vmsplice
+  * `fstat`
+  * `pread`
+  * `pwrite`
+  * `pipe2`
+  * `tee`
+  * `splice`
+  * `vmsplice`
