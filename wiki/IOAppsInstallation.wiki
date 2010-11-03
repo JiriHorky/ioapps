@@ -9,4 +9,15 @@
 `IOreplay` doesn't need any external library or application to run.
 
 = Installation =
-G
+Download latest tarball from Downloads sections or grab the source from svn and then:
+
+Run following commands:
+{{{
+make
+}}}
+and then
+{{{
+make install
+}}}
+
+This will install the whole `IOapps` suite.
