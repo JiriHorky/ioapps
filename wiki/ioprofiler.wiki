@@ -37,7 +37,7 @@ IOProfiler depends on the following application and libraries:
 ===From source===
 Download latest tarball from Downloads sections or grab the source from svn and then:
 
-To install just the IOProfiler and not the whole IOapps suite (see [IOAppsInstallation this] for details), run following commands:
+To install just the IOProfiler and not the whole IOapps suite (see [IOAppsInstallation installation instructions] for details), run following commands:
 {{{
 make profiler
 }}}
@@ -60,9 +60,9 @@ IOProfiler takes advantage of an intelligent file descriptors handling written i
 
 = Drawbacks =
   * Speed 
-   * Since the application and, most importantly, the plotting is written in Python, it is a bit slower than a native application. This is not noticeable unless you want to process and plot a graph with hundred of thousands lines (read/write requests), which may take minutes. I am not aware of any way how to avoid this.
+   * Since the application and, most importantly, the plotting is written in Python, it is a bit slower than a native application. This is not noticeable unless you want to process and plot a graph with hundred of thousands lines (read/write requests), which may take minutes. I am not aware of any way how to avoid this using Matplotlib.
    * Please note that the time and memory consuming file parsing is written in C as `ioapps` python module to overcome any other unnecessary slow down.
   * Memory consumption -
    * All recorded traces are kept in memory, because of the way recorded traces are processed. It takes approximately the same amount of memory as the file size of binary form of the recorded data. This may be improved in the future.
    * Recorded traces are converted to the list of calls for each file. This list is kept only in Python hashmaps, that consumes more memory than strictly necessary. This may be improved in the future. It takes approximately 4x the size of binary form of recorded straces.
-   * Again, the Matplotlib library is quite memory hungry in cases one wants a complicated plot with hundred of thousands of lines. It takes approximately 100MB of RAM for every 100 thousands lines to plot. It is not likely to be improved (unless the way we plot the data dramatically changes).
+   * Again, the Matplotlib library is quite memory hungry in the case one wants a complicated plot with hundred of thousands of lines. It takes approximately 100MB of RAM for every 100 thousands lines to plot. It is not likely to be improved (unless the way we plot the data dramatically changes).
