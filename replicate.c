@@ -147,7 +147,7 @@ int supported_type(mode_t type) {
  */
 
 void replicate_read(read_item_t * op_it, int op_mask) {
-	int64_t retval;
+	int64_t retval = 0;
 	int fd = op_it->o.fd;
 	fd_item_t * fd_item;
 	int myfd;
@@ -213,7 +213,7 @@ successfully read (expected: %"PRIi64")\n", retval, op_it->o.retval);
  */
 
 void replicate_write(write_item_t * op_it, int op_mask) {
-	int64_t retval;
+	int64_t retval = 0;
 	int fd = op_it->o.fd;
 	fd_item_t * fd_item;
 	int myfd;
