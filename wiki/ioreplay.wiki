@@ -3,7 +3,7 @@
 
 = Introduction =
 
-*ioreplay* is a tool for replaying IO traces. It is capable of very precise simulation of the original, traced application by issuing the same IO system calls in the same time. It is mainly useful as a standalone benchmark tool in situations, where running the original application is not possible (i.e. it requires a complicated system setup, licenses problems, input data problems etc.) or desirable. 
+*ioreplay* is a tool for replaying IO traces. It is capable of a very precise simulation of the original, traced application by issuing the same IO system calls in the same time. It is mainly useful as a standalone benchmark tool in situations, where running the original application is not possible (i.e. it requires a complicated system setup, licenses problems, input data problems etc.) or desirable. 
 
 The tool runs under Linux.
 
@@ -61,14 +61,14 @@ Suppose we only want to test replay accesses to data files, not to the libraries
 }}}
 
  === Check the environment ===
-`ioreplay` has a possibility to check whether replaying will succeed without any error or not. It is, again, whether all succeeded/failed calls will succeed/fail now. It can take into account the mapfile and the ignore file.
+`ioreplay` has a possibility to check whether replaying will succeed without any error or not. That is, whether all succeeded/failed calls will succeed/fail now. It can take into account the mapfile and the ignore file.
 
 It reports every problem that can be:
   * a missing file. In this case a minimum file size in bytes is reported as well.
   * insufficient file size
-  * existing file that should be deleted (i.e. previous access call failed)
+  * existing file that should be deleted (i.e. previous open() call failed)
 
-Every problem is reported only once, i.e. if a file is missing and some data are read from the file, it only reports failed `open()` call and not the failed `read()` calls, as they wouldn't appear if the file existed. In fact, the `ioreplay` constructs its own in-memory image of the file system based on the actual file system and missing files/directories during the check process. This way, only roots of problems are reported.
+Every problem is reported only once, i.e. if a file is missing and some data are read from the file, it only reports failed `open()` call and not the failed `read()` calls, as they wouldn't appear if the file existed. In fact, the `ioreplay` constructs its own in-memory image of the file system based on the actual file system and the missing files/directories during the check process. This way, only roots of problems are reported.
 
 Although quite intelligent, the check isn't perfect. It doesn't take into account any permission problems that could arise. In fact, there aren't enough information for reliable checking of such problems in the recorded trace file.
 
@@ -125,7 +125,7 @@ This will install ioreplay binary and manual page to your system.
 = Time Modes =
 `ioreplay` provides three time modes in which IO calls can be replayed. 
   * *diff* - default mode. Keeps delays between individual IO calls same as in the original run. This should be the most representative time mode.
-  * *asap* - in this mode, the IO calls are made as fast as possible. It can be a option if you have a long running job and you sacrifice some precision. Beware that obtained results can differ A LOT when you run multiple instances of the same job.
+  * *asap* - in this mode, the IO calls are made as fast as possible. It can be a option if you have a long running job and you don't mind sacrifing some precision. Beware that obtained results can differ A LOT when you run multiple instances of the same job.
   * *exact* - Try to make calls in same time relatively from start of the program.
 
 In every case, sleeping is implemented as active waiting with periodical checking of instruction count register.
@@ -133,26 +133,26 @@ In every case, sleeping is implemented as active waiting with periodical checkin
 Lengths of the delays between calls (think times) can be scaled using -s switch.
 
 = Architecture = 
-IOreplay is completely written in C.
+IOreplay is written completely in C.
 
 = How precise can the replaying be? =
-Well, it depends. It *can* behave almost the same as the original application but it can also be completely off. You have to try it on your application. Main aspects affecting precision:
- * Recording of traces. In some cases, the recording itself can skew timing by the factor of 100%. See [StraceLimitation why]. In that case, you can play with -s option to get quite reasonable behavior.
- * Calls delivery - given the multitask nature of Linux systems, it is not possible to guarantee issuing of IO calls in the exactly same time as in the previous run.
- * Simultaneous IO calls. They are serialized, as the `ioreplay` is single-threaded. If your application does majority of its IO calls in the same time, `ioreplay` is probably not an option for you. Please let me know name of the application in such case.
+Well, it depends. It *can* behave almost as the original application but it can also be quite off. The only way how to find it out is to actually try it with your application. Main aspects affecting the precision:
+ * Recording of traces. In some cases, the recording itself can skew timing by the factor of 100%. See [StraceLimitation strace limitations]. In that case, you can play with -s option to get quite reasonable behavior.
+ * Calls delivery - given the multitasking nature of Linux systems, it is not possible to guarantee issuing of IO calls in the exactly same time as in the previous run.
+ * Simultaneous IO calls. They are serialized, as the `ioreplay` is single-threaded. If your application does majority of its IO calls in the same time, `ioreplay` is probably not an option for you. Please let me know the name of the application in such a case.
 
 Please contact the author if you can not achieve accuracy within 10% of the original application. 
 
 == Example ==
 The scaling of `ioreplay` was tested using an [http://atlas.web.cern.ch/Atlas/ ATLAS ] analysis application. The job processed physicist data in order to find interesting events in them.
-The application accessed 89 files, from which 9 were data files. Each data file had approximately 1GB, and around 250MB were read from each file, mostly sequentially but still with gaps. In total, the job read 2160 from hard drive, spending totally 42 seconds in 7332 read requests.
-The Overhead of strace during recording was within 2%.
+The application accessed 89 files, from which 9 were data files. Each data file had approximately 1GB, and around 250MB were read from each file, mostly sequentially but still with gaps. In total, the job read 2160MB from hard drive, spending totally 42 seconds in 7332 read requests.
+The overhead of strace during recording was within 2%.
 Used hardware: 2x Intel E5520@2.27GHz = eight cores in total, 16GB RAM, 300GB SAS 15k RPM hdd (Seagate ST3300656SS).
-We tried to run up to twelve instances of the original job and `ioreplay` (each one accessing its own copy of data files) on the node, measuring the difference.
+We tried to run up to twelve instances of the original job and `ioreplay` (each one accessing its own copy of data files) on the node, measuring the difference. The `ioreplay` was run on `diff` time [#Time_mode mode].
 
 http://elvys.farm.particle.cz/scaling1.png
 
-As can be seen on the plot, the `ioreplay` performed very well (within 4%) until we overloaded the node with more than eight jobs (remember, the node had only 8 cores). After that, the original application start to run slower than `ioreplay`. However, this was well expected as the `ioreplay` was run in `diff` time [#Time_mode mode], so it still kept the delays as if the node wasn't overloaded. On the other hand, the original application did actual computing so it started to run slower as there were no free CPU cycles.
+As can be seen on the plot, the `ioreplay` performed very well (within 4%) until we overloaded the node with more than eight jobs (remember, the node had only 8 cores). After that, the original application start to run slower than `ioreplay`. However, this was well expected as the `ioreplay` was run in `diff` time [#Time_mode mode], so it still kept the delays as if the node wasn't overloaded. On the other hand, the original application did the actual computing so it started to run slower as there were no free CPU cycles.
 
 = Drawbacks =
   * Single threaded
