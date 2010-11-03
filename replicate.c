@@ -186,9 +186,10 @@ void replicate_read(read_item_t * op_it, int op_mask) {
 			if (op_it->o.retval != -1) { //do not take unsuccessfull reads into account
 				simulate_read(fd_item, op_it);
 			}
-		}
-		if ( op_mask & REP_MASK) {
+		} else if ( op_mask & REP_MASK) {
 			retval = read(myfd, data_buffer, op_it->o.size);
+		} else {
+			assert(0);
 		}
 		fd_item->fd_map->cur_pos += retval;
 	
@@ -251,10 +252,12 @@ void replicate_write(write_item_t * op_it, int op_mask) {
 			if (op_it->o.retval != -1) { //do not take unsuccessfull writes into account
 				simulate_write(fd_item, op_it);
 			}
-		}
-		if ( op_mask & REP_MASK) {
+		} else if ( op_mask & REP_MASK) {
 			retval = write(myfd, data_buffer, op_it->o.size);
+		} else {
+			assert(0);
 		}
+
 		fd_item->fd_map->cur_pos += retval;
 
 		if ( op_it->o.size > MAX_DATA) {
