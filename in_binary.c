@@ -993,7 +993,7 @@ int bin_save_items(char * filename, list_t * list) {
 				break;
 			case OP_SOCKET:
 				socket_it = (socket_item_t *) com_it;
-				if ( bin_save_close(f, &socket_it->o) != 0 ) {
+				if ( bin_save_scoket(f, &socket_it->o) != 0 ) {
 					ERRORPRINTF("Error saving to binary file %s\n", filename);
 					return -1;
 				}
