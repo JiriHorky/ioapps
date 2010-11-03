@@ -1,5 +1,12 @@
 #summary IOapps installations
 
 = Dependencies =
+`IOProfiler` depends on the following application and libraries:
+  * python2.6
+  * PyQt4
+  * matplotlib
+
+`IOreplay` doesn't need any external library or application to run.
 
 = Installation =
+G
