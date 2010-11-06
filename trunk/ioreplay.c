@@ -246,20 +246,20 @@ int main(int argc, char * * argv) {
 		bin_save_items(output, list);
 	} else if (action & ACT_SIMULATE) {
 		simulate_init(ACT_SIMULATE);
-		if (replicate(list, cpu, scale, SIM_MASK, ifilename, mfilename) != 0) {
+		if (replicate(list, cpu, scale, ACT_SIMULATE, ifilename, mfilename) != 0) {
 			ERRORPRINTF("An error occurred during replicating.%s", "\n");
 		}
 		simulate_finish();
 	} else if (action & ACT_CHECK) {
 		simulate_init(ACT_CHECK);
-		if (replicate(list, cpu, scale, SIM_MASK, ifilename, mfilename) != 0) {
+		if (replicate(list, cpu, scale, ACT_SIMULATE, ifilename, mfilename) != 0) {
 			ERRORPRINTF("An error occurred during replicating.%s", "\n");
 		}
 		simulate_check_files();
 		simulate_finish();
 	} else if (action & ACT_PREPARE) {
 		simulate_init(ACT_PREPARE);
-		if (replicate(list, cpu, scale, SIM_MASK, ifilename, mfilename) != 0) {
+		if (replicate(list, cpu, scale, ACT_SIMULATE, ifilename, mfilename) != 0) {
 			ERRORPRINTF("An error occurred during replicating.%s", "\n");
 		}
 		///< @todo to change

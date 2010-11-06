@@ -143,7 +143,7 @@ int supported_type(mode_t type) {
 
 /** Replicates one read operation.
  * @arg op_it operation item structure in which are information about the write operation
- * @arg op_mask whether really replicate or just simulate it. SIM_MASK or REP_MASK.
+ * @arg op_mask whether really replicate or just simulate it. ACT_SIMULATE or ACT_REPLICATE.
  */
 
 void replicate_read(read_item_t * op_it, int op_mask) {
@@ -181,12 +181,12 @@ void replicate_read(read_item_t * op_it, int op_mask) {
 			data = data_buffer;
 		}		
 
-		if (op_mask & SIM_MASK) {
+		if (op_mask & ACT_SIMULATE) {
 			retval = op_it->o.retval;
 			if (op_it->o.retval != -1) { //do not take unsuccessfull reads into account
 				simulate_read(fd_item, op_it);
 			}
-		} else if ( op_mask & REP_MASK) {
+		} else if ( op_mask & ACT_REPLICATE) {
 			retval = read(myfd, data_buffer, op_it->o.size);
 		} else {
 			assert(0);
@@ -209,7 +209,7 @@ successfully read (expected: %"PRIi64")\n", retval, op_it->o.retval);
 
 /** Replicates one write operation.
  * @arg op_it operation item structure in which are information about the write operation
- * @arg op_mask whether really replicate or just simulate it. SIM_MASK or REP_MASK.
+ * @arg op_mask whether really replicate or just simulate it. ACT_SIMULATE or ACT_REPLICATE.
  */
 
 void replicate_write(write_item_t * op_it, int op_mask) {
@@ -247,12 +247,12 @@ void replicate_write(write_item_t * op_it, int op_mask) {
 			data = data_buffer;
 		}		
 
-		if (op_mask & SIM_MASK) {
+		if (op_mask & ACT_SIMULATE) {
 			retval = op_it->o.retval;
 			if (op_it->o.retval != -1) { //do not take unsuccessfull writes into account
 				simulate_write(fd_item, op_it);
 			}
-		} else if ( op_mask & REP_MASK) {
+		} else if ( op_mask & ACT_REPLICATE) {
 			retval = write(myfd, data_buffer, op_it->o.size);
 		} else {
 			assert(0);
@@ -333,7 +333,7 @@ void replicate_pipe(pipe_item_t * op_it, int op_mask) {
 
 /** Replicates one open(2)/creat(2) operation.
  * @arg op_it operation item structure in which are information about the open/creat operation
- * @arg op_mask whether really replicate or just simulate it. SIM_MASK or REP_MASK.
+ * @arg op_mask whether really replicate or just simulate it. ACT_SIMULATE or ACT_REPLICATE.
  */
 
 void replicate_open(open_item_t * op_it, int op_mask) {
@@ -351,10 +351,10 @@ void replicate_open(open_item_t * op_it, int op_mask) {
 			//DEBUGPRINTF("Ignoring opening of file %s\n", op_it->o.name);
 			return;
 		}
-		if (op_mask & REP_MASK) {
+		if (op_mask & ACT_REPLICATE) {
 			retval = open(name, flags);
 		} else {
-			if (op_mask & SIM_MASK) {
+			if (op_mask & ACT_SIMULATE) {
 				if (name != op_it->o.name) {
 					strcpy(op_it->o.name, name);
 				}
@@ -388,17 +388,17 @@ void replicate_open(open_item_t * op_it, int op_mask) {
 			name = op_it->o.name;
 		}
 
-		if (op_mask & REP_MASK && ! (flags & O_IGNORE) ) { //i should replicate and not ignore it
+		if (op_mask & ACT_REPLICATE && ! (flags & O_IGNORE) ) { //i should replicate and not ignore it
 			if (op_it->o.mode == MODE_UNDEF) { //we know, that we don't want to use mode flag at all
 				retval = open(name, flags);
 			} else {
 				retval = open(name, flags, op_it->o.mode);
 			}
-		} else { // SIM_MASK or O_IGNORE
+		} else { // ACT_SIMULATE or O_IGNORE
 			if (op_it->o.name != name) {
 				strcpy(op_it->o.name, name);
 			}
-			if (op_mask & SIM_MASK && ! (flags & O_IGNORE)) {
+			if (op_mask & ACT_SIMULATE && ! (flags & O_IGNORE)) {
 				simulate_creat(&op_it->o);
 			}
 			retval = simulate_get_open_fd();
@@ -437,7 +437,7 @@ void replicate_open(open_item_t * op_it, int op_mask) {
 
 /** Replicate clone operation.
  * @arg op_it operation item structure in which are information about the close operation
- * @arg op_mask whether really replicate or just simulate it. SIM_MASK or REP_MASK.
+ * @arg op_mask whether really replicate or just simulate it. ACT_SIMULATE or ACT_REPLICATE.
  */
 
 void replicate_clone(clone_item_t * op_it, int op_mask) {
@@ -468,7 +468,7 @@ void replicate_clone(clone_item_t * op_it, int op_mask) {
 
 /** Replicates one close operation.
  * @arg op_it operation item structure in which are information about the close operation
- * @arg op_mask whether really replicate or just simulate it. SIM_MASK or REP_MASK.
+ * @arg op_mask whether really replicate or just simulate it. ACT_SIMULATE or ACT_REPLICATE.
  */
 
 void replicate_close(close_item_t * op_it, int op_mask) {
@@ -502,7 +502,7 @@ void replicate_close(close_item_t * op_it, int op_mask) {
 			retval = 0;
 		} else {
 			if (decrease_fd_usage(usage_map, myfd)) { // it was the last one, really close it
-				if (op_mask & REP_MASK) {
+				if (op_mask & ACT_REPLICATE) {
 					retval = close(myfd);
 				} else { //simulating mode
 					retval = 0;
@@ -531,7 +531,7 @@ void replicate_close(close_item_t * op_it, int op_mask) {
 
 /** Replicates one unlink operation.
  * @arg op_it operation item structure in which are information about the unlink operation
- * @arg op_mask whether really replicate or just simulate it. SIM_MASK or REP_MASK.
+ * @arg op_mask whether really replicate or just simulate it. ACT_SIMULATE or ACT_REPLICATE.
  */
 
 void replicate_unlink(unlink_item_t * op_it, int op_mask) {
@@ -543,7 +543,7 @@ void replicate_unlink(unlink_item_t * op_it, int op_mask) {
 		return;
 	} 
 
-	if ( op_mask & REP_MASK) {
+	if ( op_mask & ACT_REPLICATE) {
 		retval = unlink(name);
 
 		if (retval == -1 && retval != op_it->o.retval) {
@@ -551,7 +551,7 @@ void replicate_unlink(unlink_item_t * op_it, int op_mask) {
 		} else if (retval != op_it->o.retval) {
 			ERRORPRINTF("Unlink result of file %s other than expected: %d\n", name, retval);
 		}
-	} else if ( op_mask & SIM_MASK ) {
+	} else if ( op_mask & ACT_SIMULATE ) {
 		simulate_unlink(&op_it->o);
 	}
 }
@@ -560,7 +560,7 @@ void replicate_unlink(unlink_item_t * op_it, int op_mask) {
  * actual seek on 64bit machines too.
  *
  * @arg op_it operation item structure in which are information about the _llseek operation
- * @arg op_mask whether really replicate or just simulate it. SIM_MASK or REP_MASK.
+ * @arg op_mask whether really replicate or just simulate it. ACT_SIMULATE or ACT_REPLICATE.
  */
 
 void replicate_llseek(llseek_item_t * op_it, int op_mask) {
@@ -596,7 +596,7 @@ void replicate_llseek(llseek_item_t * op_it, int op_mask) {
 			return;
 		}
 	
-		if ( op_mask & REP_MASK) {
+		if ( op_mask & ACT_REPLICATE) {
 #ifdef SYS__llseek //32bit machine
 			retval = syscall(SYS__llseek, myfd, high, low, &result, op_it->o.flag);
 #else 
@@ -617,11 +617,11 @@ void replicate_llseek(llseek_item_t * op_it, int op_mask) {
 		} else if (result != op_it->o.f_offset) {
 			ERRORPRINTF("_llseek's final offset (%"PRIi64") is different from what expected(%"PRIi64")\n",
 					result, op_it->o.f_offset);
-			if (op_mask & SIM_MASK) {
+			if (op_mask & ACT_SIMULATE) {
 				fd_item->fd_map->cur_pos = op_it->o.f_offset;
 			}
 		} else {
-			if (op_mask & SIM_MASK) {
+			if (op_mask & ACT_SIMULATE) {
 				fd_item->fd_map->cur_pos = op_it->o.f_offset;
 			}
 		}
@@ -632,7 +632,7 @@ void replicate_llseek(llseek_item_t * op_it, int op_mask) {
  *  using _llseek on 32bit systems too.
  *
  * @arg op_it operation item structure in which are information about the lseek operation
- * @arg op_mask whether really replicate or just simulate it. SIM_MASK or REP_MASK.
+ * @arg op_mask whether really replicate or just simulate it. ACT_SIMULATE or ACT_REPLICATE.
  */
 
 void replicate_lseek(lseek_item_t * op_it, int op_mask) {
@@ -674,7 +674,7 @@ void replicate_lseek(lseek_item_t * op_it, int op_mask) {
 			return;
 		}
 	
-		if ( op_mask & REP_MASK) {
+		if ( op_mask & ACT_REPLICATE) {
 			retval = lseek(myfd, op_it->o.offset, op_it->o.flag);
 		} else {
 			retval = op_it->o.retval;
@@ -686,11 +686,11 @@ void replicate_lseek(lseek_item_t * op_it, int op_mask) {
 		} else if (retval != op_it->o.retval) {
 			ERRORPRINTF("lseek's final offset (%"PRIi64") is different from what expected(%"PRIi64")\n",
 					retval, op_it->o.retval);
-			if (op_mask & SIM_MASK) {
+			if (op_mask & ACT_SIMULATE) {
 				fd_item->fd_map->cur_pos = retval;
 			}
 		} else {
-			if (op_mask & SIM_MASK) {
+			if (op_mask & ACT_SIMULATE) {
 				fd_item->fd_map->cur_pos = retval;
 			}
 		}
@@ -700,7 +700,7 @@ void replicate_lseek(lseek_item_t * op_it, int op_mask) {
 
 /** Replicates one mkdir operation.
  * @arg op_it operation item structure in which are information about the _llseek operation
- * @arg op_mask whether really replicate or just simulate it. SIM_MASK or REP_MASK.
+ * @arg op_mask whether really replicate or just simulate it. ACT_SIMULATE or ACT_REPLICATE.
  */
 
 void replicate_mkdir(mkdir_item_t * op_it, int op_mask) {
@@ -712,7 +712,7 @@ void replicate_mkdir(mkdir_item_t * op_it, int op_mask) {
 		return;
 	}
 
-	if (op_mask & REP_MASK) {
+	if (op_mask & ACT_REPLICATE) {
 		retval = mkdir(name, op_it->o.mode);
 
 		if (retval == -1 && retval != op_it->o.retval) {
@@ -720,14 +720,14 @@ void replicate_mkdir(mkdir_item_t * op_it, int op_mask) {
 		} else if (retval != op_it->o.retval) {
 			ERRORPRINTF("Mkdir result of file %s other than expected: %d\n", name, retval);
 		}
-	} else if ( op_mask & SIM_MASK ) {
+	} else if ( op_mask & ACT_SIMULATE ) {
 		simulate_mkdir(&op_it->o);
 	}
 }
 
 /** Replicates one rmdir operation.
  * @arg op_it operation item structure in which are information about the _llseek operation
- * @arg op_mask whether really replicate or just simulate it. SIM_MASK or REP_MASK.
+ * @arg op_mask whether really replicate or just simulate it. ACT_SIMULATE or ACT_REPLICATE.
  */
 
 void replicate_rmdir(rmdir_item_t * op_it, int op_mask) {
@@ -739,7 +739,7 @@ void replicate_rmdir(rmdir_item_t * op_it, int op_mask) {
 		return;
 	}
 
-	if (op_mask & REP_MASK) {
+	if (op_mask & ACT_REPLICATE) {
 		retval = rmdir(name);
 
 		if (retval == -1 && retval != op_it->o.retval) {
@@ -747,7 +747,7 @@ void replicate_rmdir(rmdir_item_t * op_it, int op_mask) {
 		} else if (retval != op_it->o.retval) {
 			ERRORPRINTF("Rmdir result of file %s other than expected: %d\n", name, retval);
 		}
-	} else if ( op_mask & SIM_MASK ) {
+	} else if ( op_mask & ACT_SIMULATE ) {
 		simulate_rmdir(&op_it->o);
 	}
 }
@@ -757,7 +757,7 @@ void replicate_rmdir(rmdir_item_t * op_it, int op_mask) {
  * keeps track of what it did in original process .
  *
  * @arg op_it operation item structure in which are information about the _llseek operation
- * @arg op_mask whether really replicate or just simulate it. SIM_MASK or REP_MASK.
+ * @arg op_mask whether really replicate or just simulate it. ACT_SIMULATE or ACT_REPLICATE.
  */
 
 void replicate_dup(dup_item_t * op_it, int op_mask) {
@@ -813,7 +813,7 @@ void replicate_access(access_item_t * op_it, int op_mask) {
 		}
 	}
 	
-	if (op_mask & REP_MASK) {
+	if (op_mask & ACT_REPLICATE) {
 		retval = access(op_it->o.name, op_it->o.mode);
 
 		if (retval == -1 && retval != op_it->o.retval) {
@@ -821,7 +821,7 @@ void replicate_access(access_item_t * op_it, int op_mask) {
 		} else if (retval != op_it->o.retval) {
 			ERRORPRINTF("Access result of file %s other than expected: %d\n", op_it->o.name, retval);
 		}
-	} else if (op_mask & SIM_MASK) {
+	} else if (op_mask & ACT_SIMULATE) {
 		simulate_access(&op_it->o);
 	}
 }
@@ -844,7 +844,7 @@ void replicate_stat(stat_item_t * op_it, int op_mask) {
 		}
 	}
 	
-	if (op_mask & REP_MASK) {
+	if (op_mask & ACT_REPLICATE) {
 		retval = stat(op_it->o.name, &st_buf);
 
 		if (retval == -1 && retval != op_it->o.retval) {
@@ -852,7 +852,7 @@ void replicate_stat(stat_item_t * op_it, int op_mask) {
 		} else if (retval != op_it->o.retval) {
 			ERRORPRINTF("Stat result of file %s other than expected: %d\n", op_it->o.name, retval);
 		}
-	} else if (op_mask & SIM_MASK) {
+	} else if (op_mask & ACT_SIMULATE) {
 		simulate_stat(&op_it->o);
 	}
 }
