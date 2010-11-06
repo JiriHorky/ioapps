@@ -54,8 +54,6 @@
 #define MAX_PARENT_IDS 20
 #define VERSION "1.0"
 
-#define SIM_MASK 0x1
-#define REP_MASK 0x2
 
 #define SHM_KEY 0x00BEEF00
 #define SHM_SIZE (10*1024*1024)
