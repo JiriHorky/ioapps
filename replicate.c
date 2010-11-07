@@ -201,8 +201,8 @@ void replicate_read(read_item_t * op_it, int op_mask) {
 			ERRORPRINTF("%d: Read from fd %d->%d failed: %s\n", pid, fd, myfd, strerror(errno));
 //			hash_table_dump2(ht, dump_fd_list_item);
 		} else if (retval != op_it->o.size && retval != op_it->o.retval) {
-			DEBUGPRINTF("Warning, not every data were read! Only %"PRIi64" bytes were \
-successfully read (expected: %"PRIi64")\n", retval, op_it->o.retval);
+			DEBUGPRINTF("Warning, %"PRIi64" bytes were successfully read \
+(expected: %"PRIi64")\n", retval, op_it->o.retval);
 		}
 	}
 }
@@ -267,7 +267,7 @@ void replicate_write(write_item_t * op_it, int op_mask) {
 		if (retval == -1) {
 			ERRORPRINTF("Write to fd %d failed: %s\n", fd, strerror(errno));
 		} else if (retval != op_it->o.size) {
-			DEBUGPRINTF("Warning, not every data were written! Only %"PRIi64" bytes were successfully outputed\n", retval);
+			DEBUGPRINTF("Warning, %"PRIi64" bytes were successfully outputed (%"PRIi64" expected)\n", retval, op_it->o.size);
 		}
 	}
 }
