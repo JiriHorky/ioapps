@@ -189,11 +189,11 @@ int main(int argc, char * * argv) {
 				break;
 			case 't':
 				if ( ! strcmp(TIME_DIFF_STR, optarg) ) {
-					action = (action & ! TIME_MASK) | TIME_DIFF;
+					action = (action & ~TIME_MASK) | TIME_DIFF;
 				} else if ( ! strcmp(TIME_EXACT_STR, optarg) ) {
-					action = (action & ! TIME_MASK) | TIME_EXACT;
+					action = (action & ~TIME_MASK) | TIME_EXACT;
 				} else if ( ! strcmp(TIME_ASAP_STR, optarg) ) {
-					action = (action & ! TIME_MASK) | TIME_ASAP;
+					action = (action & ~TIME_MASK) | TIME_ASAP;
 				} else {
 					fprintf(stderr, "Unknown timemode specified.\n");
 					exit(-1);
