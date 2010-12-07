@@ -250,6 +250,11 @@ static PyObject * free_items(PyObject *self, PyObject *args) {
 
 static PyObject * finish(PyObject *self, PyObject *args) {
 	simulate_finish();
+	//I am not sure whether this will lead to memory leak or not...
+	PyDict_Clear(read_dict_g);
+	PyDict_Clear(write_dict_g);
+	read_dict_g = NULL;
+	write_dict_g = NULL;
 	return Py_None;
 }
 

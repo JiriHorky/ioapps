@@ -558,7 +558,7 @@ class CentralWidget(QWidget):
             modelView = self.view.model();        
             self.filter.setSourceModel(None)
             self.view.setModel(None)
-            self.model.clear()  #clear
+            model.clear()  #clear
             self.filter.setSourceModel(model)
             self.view.setModel(modelView) # attach again
             ioapps.finish()
