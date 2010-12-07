@@ -212,15 +212,6 @@ class SubGrapher:
         
         self.axes.set_xlabel(xlabel)
         self.axes.set_ylabel(ylabel)
-                    
-    def plotHistSize(self):
-        if self.data == None:
-            self.__prepareData
-            
-        self.axes.clear()                    
-        self.axes.hist(self.data['size'], 50, facecolor='green', range=(rangeMin, rangeMax))
-        self.axes.set_xlabel(xlabel);
-        self.axes.set_ylabel(ylabel);
             
     def plotHistSize(self):
         if self.data == None:
@@ -254,7 +245,7 @@ class SubGrapher:
         
         graphdata = np.column_stack((self.data['off'], self.data['start'], self.data['off']+ self.data['size'], self.data['start'] + self.data['dur']))
 
-        lineSegments = LineCollection(graphdata.reshape(-1,2,2), linewidths=(8));
+        lineSegments = LineCollection(graphdata.reshape(-1,2,2), linewidths=(4));
         lineSegments.set_picker(True)        
         self.lineCol = self.axes.add_collection(lineSegments)
     
