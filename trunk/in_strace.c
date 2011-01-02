@@ -161,6 +161,107 @@ int strace_read_write(char * line, list_t * list) {
 	return 0;
 }
 
+/** Reads pwrite(2) syscall from strace file.
+ *
+ * @arg f file from which to read, must be opened
+ * @arg list list to which to append new structure
+ * @return 0 on success, non-zero otherwise
+ */
+
+int strace_read_pwrite(char * line, list_t * list) {
+	pwrite_item_t * op_item;
+	int retval;
+	char start_time[MAX_TIME_STRING];
+	char dur[MAX_TIME_STRING];
+	char * line2;
+
+	op_item = new_pwrite_item();
+
+	op_item->type = OP_PWRITE;
+	//first portion
+	if ((retval = sscanf(line, " %d %s %*[^(](%d, ", &op_item->o.info.pid, start_time, &op_item->o.fd)) == EOF) {
+		ERRORPRINTF("Error: unexpected end of line%s", "\n");
+		free(op_item);
+		return -1;
+	}
+	if (retval != 3) {
+		ERRORPRINTF("Error: It was not able to match all fields required:%d\n", retval);
+		ERRORPRINTF("Failing line: %s", line);
+		free(op_item);
+		return -1;
+	}
+
+	//second part
+	line2 = strace_pos_comma(line);
+	if (line2 == NULL || (retval = sscanf(line2, ", %"SCNi64", %"SCNi64") = %"SCNi64"%*[^<]<%[^>]", &op_item->o.size, &op_item->o.offset, &op_item->o.retval, dur)) == EOF) {
+		ERRORPRINTF("Error: unexpected end of line%s", "\n");
+		free(op_item);
+		return -1;
+	}
+	if (retval != 4) {
+		ERRORPRINTF("Error: It was not able to match all fields required while parsing line2:%d\n", retval);
+		ERRORPRINTF("Failing line:%s", line);
+		free(op_item);
+		return -1;
+	}
+
+	op_item->o.info.start = read_time(start_time);
+	op_item->o.info.dur = read_duration(dur);
+
+	list_append(list, &op_item->item);
+	return 0;
+}
+
+/** Reads pread(2) syscall from strace file.
+ *
+ * @arg f file from which to read, must be opened
+ * @arg list list to which to append new structure
+ * @return 0 on success, non-zero otherwise
+ */
+
+int strace_read_pread(char * line, list_t * list) {
+	pread_item_t * op_item;
+	int retval;
+	char start_time[MAX_TIME_STRING];
+	char dur[MAX_TIME_STRING];
+	char * line2;
+
+	op_item = new_pread_item();
+
+	op_item->type = OP_PREAD;
+	//first portion
+	if ((retval = sscanf(line, " %d %s %*[^(](%d, ", &op_item->o.info.pid, start_time, &op_item->o.fd)) == EOF) {
+		ERRORPRINTF("Error: unexpected end of line%s", "\n");
+		free(op_item);
+		return -1;
+	}
+	if (retval != 3) {
+		ERRORPRINTF("Error: It was not able to match all fields required:%d\n", retval);
+		ERRORPRINTF("Failing line: %s", line);
+		free(op_item);
+		return -1;
+	}
+
+	//second part
+	line2 = strace_pos_comma(line);
+	if (line2 == NULL || (retval = sscanf(line2, ", %"SCNi64", %"SCNi64") = %"SCNi64"%*[^<]<%[^>]", &op_item->o.size, &op_item->o.offset, &op_item->o.retval, dur)) == EOF) {
+		ERRORPRINTF("Error: unexpected end of line%s", "\n");
+		free(op_item);
+		return -1;
+	}
+	if (retval != 4) {
+		ERRORPRINTF("Error: It was not able to match all fields required while parsing line2:%d\n", retval);
+		ERRORPRINTF("Failing line:%s", line);
+		free(op_item);
+		return -1;
+	}
+
+	op_item->o.info.start = read_time(start_time);
+	op_item->o.info.dur = read_duration(dur);
+
+	list_append(list, &op_item->item);
+	return 0;
+}
 /** Reads read event from strace file.
  *
  * @arg f file from which to read, must be opened
@@ -908,6 +1009,14 @@ char strace_get_operation_code(char * line, int stats) {
 		return OP_WRITE;
 	} else if (! strcmp(operation, "read")) {
 		return OP_READ;
+	} else if (! strcmp(operation, "pwrite")) {
+		return OP_PWRITE;
+	} else if (! strcmp(operation, "pwrite64")) {
+		return OP_PWRITE;
+	} else if (! strcmp(operation, "pread")) {
+		return OP_PREAD;
+	} else if (! strcmp(operation, "pread64")) {
+		return OP_PREAD;
 	} else if (! strcmp(operation, "close")) {
 		return OP_CLOSE;
 	} else if (! strcmp(operation, "open")) {
@@ -1030,6 +1139,16 @@ inline int strace_process_line(char * line, list_t * list, hash_table_t * ht, in
 			break;
 		case OP_READ:
 			if ( (retval = strace_read_read(line, list)) != 0) {
+				return retval;
+			}
+			break;
+		case OP_PWRITE:
+			if ( (retval = strace_read_pwrite(line, list)) != 0) {
+				return retval;
+			}
+			break;
+		case OP_PREAD:
+			if ( (retval = strace_read_pread(line, list)) != 0) {
 				return retval;
 			}
 			break;
@@ -1161,6 +1280,7 @@ int strace_get_items(char * filename, list_t * list, int stats) {
 	if (stats) {
 		stats_print();
 	}
+	hash_table_destroy(&ht);
 
 	fclose(f);
 	return 0;

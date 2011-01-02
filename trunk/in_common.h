@@ -59,6 +59,18 @@ typedef struct write_item {
 	write_op_t o;
 } write_item_t;
 
+typedef struct pread_item {
+	item_t item; /* make me item of the list - it MUST be defined first */
+	char type; /* and this MUST be defined as second */
+	pread_op_t o;
+} pread_item_t;
+
+typedef struct pwrite_item {
+	item_t item; /* make me item of the list - it MUST be defined first */
+	char type; /* and this MUST be defined as second */
+	pwrite_op_t o;
+} pwrite_item_t;
+
 typedef struct pipe_item {
 	item_t item;
 	char type;
@@ -142,6 +154,8 @@ typedef struct socket_item {
 
 write_item_t * new_write_item();
 read_item_t * new_read_item();
+pwrite_item_t * new_pwrite_item();
+pread_item_t * new_pread_item();
 mkdir_item_t * new_mkdir_item();
 rmdir_item_t * new_rmdir_item();
 dup_item_t * new_dup_item();

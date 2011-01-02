@@ -144,6 +144,50 @@ int bin_read_write(FILE * f, list_t * list, int64_t num) {
 	return 0;
 }
 
+int bin_read_pread(FILE * f, list_t * list, int64_t num) {
+	int rv;
+	int32_t i32;
+	int64_t i64;
+	char c = OP_PREAD;
+	pread_item_t * op_it;
+	op_it = new_pread_item();
+	op_it->type = c;
+
+	read_int32(op_it->o.fd);
+	read_int64(op_it->o.size);
+	read_int64(op_it->o.offset);
+	read_int64(op_it->o.retval);
+
+	if ( (rv = bin_read_info(f, &op_it->o.info, c, num)) != 0) {
+		BIN_READ_ERROR_FREE;
+	}
+
+	list_append(list, &op_it->item);
+	return 0;
+}
+
+int bin_read_pwrite(FILE * f, list_t * list, int64_t num) {
+	int rv;
+	int32_t i32;
+	int64_t i64;
+	char c = OP_PWRITE;
+	pwrite_item_t * op_it;
+	op_it = new_pwrite_item();
+	op_it->type = c;
+
+	read_int32(op_it->o.fd);
+	read_int64(op_it->o.size);
+	read_int64(op_it->o.offset);
+	read_int64(op_it->o.retval);
+
+	if ( (rv = bin_read_info(f, &op_it->o.info, c, num)) != 0) {
+		BIN_READ_ERROR_FREE;
+	}
+
+	list_append(list, &op_it->item);
+	return 0;
+}
+
 int bin_read_open(FILE * f, list_t * list, int64_t num) {
 	int rv;
 	int32_t i32;
@@ -480,6 +524,18 @@ int bin_get_items(char * filename, list_t * list) {
 					return -1;
 				}
 				break;
+			case OP_PWRITE:
+				if ( bin_read_pwrite(f, list, i) != 0 ) {
+					ERRORPRINTF("Error reading binary file: %s\n", filename);
+					return -1;
+				}
+				break;
+			case OP_PREAD:
+				if ( bin_read_pread(f, list, i) != 0 ) {
+					ERRORPRINTF("Error reading binary file: %s\n", filename);
+					return -1;
+				}
+				break;
 			case OP_OPEN:
 				if ( bin_read_open(f, list, i) != 0 ) {
 					ERRORPRINTF("Error reading binary file: %s\n", filename);
@@ -612,6 +668,44 @@ int bin_save_read(FILE * f, read_op_t * op_it) {
 	write_char(c);
 	write_int32(op_it->fd);
 	write_int64(op_it->size);
+	write_int64(op_it->retval);
+
+	if ( (rv = bin_write_info(f, &op_it->info)) != 0) {
+		BIN_WRITE_ERROR;
+	}
+
+	return 0;
+}
+
+int bin_save_pwrite(FILE * f, pwrite_op_t * op_it) {
+	int rv;
+	int32_t i32;
+	int64_t i64;
+	char c = OP_PWRITE;
+
+	write_char(c);
+	write_int32(op_it->fd);
+	write_int64(op_it->size);
+	write_int64(op_it->offset);
+	write_int64(op_it->retval);
+
+	if ( (rv = bin_write_info(f, &op_it->info)) != 0) {
+		BIN_WRITE_ERROR;
+	}
+
+	return 0;
+}
+
+int bin_save_pread(FILE * f, pread_op_t * op_it) {
+	int rv;
+	int32_t i32;
+	int64_t i64;
+	char c = OP_PREAD;
+
+	write_char(c);
+	write_int32(op_it->fd);
+	write_int64(op_it->size);
+	write_int64(op_it->offset);
 	write_int64(op_it->retval);
 
 	if ( (rv = bin_write_info(f, &op_it->info)) != 0) {
@@ -867,6 +961,8 @@ int bin_save_items(char * filename, list_t * list) {
 	common_op_item_t * com_it;
 	write_item_t * write_it;
 	read_item_t * read_it;
+	pwrite_item_t * pwrite_it;
+	pread_item_t * pread_it;
 	open_item_t * open_it;
 	close_item_t * close_it;
 	unlink_item_t * unlink_it;
@@ -901,6 +997,20 @@ int bin_save_items(char * filename, list_t * list) {
 			case OP_READ:
 				read_it = (read_item_t *) com_it;
 				if ( bin_save_read(f, &read_it->o) != 0 ) {
+					ERRORPRINTF("Error saving to binary file %s\n", filename);
+					return -1;
+				}
+				break;
+			case OP_PWRITE:
+				pwrite_it = (pwrite_item_t *) com_it;
+				if ( bin_save_pwrite(f, &pwrite_it->o) != 0 ) {
+					ERRORPRINTF("Error saving to binary file %s\n", filename);
+					return -1;
+				}
+				break;
+			case OP_PREAD:
+				pread_it = (pread_item_t *) com_it;
+				if ( bin_save_pread(f, &pread_it->o) != 0 ) {
 					ERRORPRINTF("Error saving to binary file %s\n", filename);
 					return -1;
 				}

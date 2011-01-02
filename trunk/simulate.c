@@ -117,7 +117,7 @@ void simulate_finish() {
 	simfs_finish();
 }
 
-inline void simulate_rw(fd_item_t * fd_item, read_item_t * op_it, hash_table_t * ht) {
+inline sim_item_t * simulate_get_sim_item(fd_item_t * fd_item, hash_table_t * ht) {
 	item_t * item;
 	sim_item_t * sim_item;
 
@@ -132,19 +132,25 @@ inline void simulate_rw(fd_item_t * fd_item, read_item_t * op_it, hash_table_t *
 	} else {
 		sim_item = hash_table_entry(item, sim_item_t, item);
 	}
+	return sim_item;
+}
 
+
+inline void simulate_append_rw(sim_item_t * sim_item, int64_t size, int64_t offset, struct int32timeval start, int32_t dur, int64_t retval) {
 	rw_op_t * rw_op = malloc(sizeof(rw_op_t));
 	item_init(&rw_op->item);
-	rw_op->size = op_it->o.retval; //we notice only how many bytes were actually read/written, not tried
-	rw_op->offset = fd_item->fd_map->cur_pos;
-	rw_op->start = op_it->o.info.start;
-	rw_op->dur = op_it->o.info.dur;
+	rw_op->size = retval; //we notice only how many bytes were actually read/written, not tried
+	rw_op->offset = offset;
+	rw_op->start = start;
+	rw_op->dur = dur;
 
 	list_append(&sim_item->list, &rw_op->item);
 }
 
+
 inline void simulate_write(fd_item_t * fd_item, write_item_t * op_it) {
 	simfs_t * simfs = simfs_find(fd_item->fd_map->name);
+	sim_item_t * sim_item = NULL;
 	uint64_t off;
 
 	if (sim_mode & ACT_CHECK || sim_mode & ACT_PREPARE) {
@@ -152,7 +158,9 @@ inline void simulate_write(fd_item_t * fd_item, write_item_t * op_it) {
 			DEBUGPRINTF("Entry for %s in simfs missing, which might be OK (e.g. tmp file created,unlinked,written and then closed)\n", fd_item->fd_map->name);
 			return;
 		}
-		off = fd_item->fd_map->cur_pos + op_it->o.retval;
+
+		//offset is changed in replicate functions, this is to be changed.
+		off = fd_item->fd_map->cur_pos + op_it->o.retval; 
 
 		if (simfs->virt_size < off) {
 			simfs->virt_size = off;
@@ -171,13 +179,15 @@ inline void simulate_write(fd_item_t * fd_item, write_item_t * op_it) {
 	}
 
 	if ( sim_mode & ACT_SIMULATE) {
-		simulate_rw(fd_item, (read_item_t*) op_it, sim_map_write); ///< @todo this is nasty hack, as we are rely on that read_item and write_item are the same...
+		sim_item = simulate_get_sim_item(fd_item, sim_map_write);
+		simulate_append_rw(sim_item, op_it->o.size, fd_item->fd_map->cur_pos, op_it->o.info.start, op_it->o.info.dur, op_it->o.retval);
 	}
 }
 
 
 inline void simulate_read(fd_item_t * fd_item, read_item_t * op_it) {
 	simfs_t * simfs = simfs_find(fd_item->fd_map->name);
+	sim_item_t * sim_item = NULL;
 	uint64_t off;
 
 	if (sim_mode & ACT_CHECK || sim_mode & ACT_PREPARE) {
@@ -192,9 +202,68 @@ inline void simulate_read(fd_item_t * fd_item, read_item_t * op_it) {
 		}
 	}
 	if (sim_mode & ACT_SIMULATE) {
-		simulate_rw(fd_item, op_it, sim_map_read);
+		sim_item = simulate_get_sim_item(fd_item, sim_map_read);
+		simulate_append_rw(sim_item, op_it->o.size, fd_item->fd_map->cur_pos, op_it->o.info.start, op_it->o.info.dur, op_it->o.retval);
 	}
 }
+
+inline void simulate_pwrite(fd_item_t * fd_item, pwrite_item_t * op_it) {
+	simfs_t * simfs = simfs_find(fd_item->fd_map->name);
+	sim_item_t * sim_item = NULL;
+	uint64_t off;
+
+	if (sim_mode & ACT_CHECK || sim_mode & ACT_PREPARE) {
+		if ( ! simfs) {
+			DEBUGPRINTF("Entry for %s in simfs missing, which might be OK (e.g. tmp file created,unlinked,written and then closed)\n", fd_item->fd_map->name);
+			return;
+		}
+		off = fd_item->fd_map->cur_pos;
+
+		if (simfs->virt_size < off) {
+			simfs->virt_size = off;
+		}
+
+		if (simfs->physical) {
+			if ( fd_item->fd_map->cur_pos > simfs->phys_size ) {
+				ERRORPRINTF("Pwrite to file %s on pos %"PRIu64" would fail as the current position is behind end of the file(%"PRIu64").\n",
+						fd_item->fd_map->name, fd_item->fd_map->cur_pos, simfs->phys_size);
+			} else {
+				if (simfs->phys_size < off) {
+					simfs->phys_size = off;
+				}
+			}
+		}
+	}
+
+	if ( sim_mode & ACT_SIMULATE) {
+		sim_item = simulate_get_sim_item(fd_item, sim_map_write);
+		simulate_append_rw(sim_item, op_it->o.size, op_it->o.offset, op_it->o.info.start, op_it->o.info.dur, op_it->o.retval);
+	}
+}
+
+
+inline void simulate_pread(fd_item_t * fd_item, pread_item_t * op_it) {
+	simfs_t * simfs = simfs_find(fd_item->fd_map->name);
+	sim_item_t * sim_item = NULL;
+	uint64_t off;
+
+	if (sim_mode & ACT_CHECK || sim_mode & ACT_PREPARE) {
+		if ( ! simfs) {
+			DEBUGPRINTF("Entry for %s in simfs missing, which might be OK (e.g. tmp file created/unlinked and then written)\n", fd_item->fd_map->name);
+			return;
+		}
+
+		off = fd_item->fd_map->cur_pos;
+		if (simfs->virt_size < off) {
+			simfs->virt_size = off;
+		}
+	}
+	if (sim_mode & ACT_SIMULATE) {
+		sim_item = simulate_get_sim_item(fd_item, sim_map_read);
+		simulate_append_rw(sim_item, op_it->o.size, op_it->o.offset, op_it->o.info.start, op_it->o.info.dur, op_it->o.retval);
+	}
+}
+
 
 void simulate_access(access_op_t * op_it) {
 	if (sim_mode & ACT_CHECK || sim_mode & ACT_PREPARE) {
