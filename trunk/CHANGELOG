@@ -1,4 +1,11 @@
 
+v1.1
+   * Bug fixed: ioprofiler can now re-open files without restarting the application
+   * Bug fixed: some memory leaks and minor bug fixed
+   * New feature: support for pread() and pwrite() system calls added
+
+ -- Jiri Horky <jiri.horky@gmail.com>  Thu, 02 Jan 2011 12:56:30 +0100
+
 v1.0
    * Initial release
 
