@@ -11,9 +11,11 @@ Both [ioreplay] and [ioprofiler] process the list of recorded system calls in or
   * `creat`
   * `mkdir`
   * `access`
-  * `stat`
+  * `stat` (and `stat64`)
   * `unlink`
   * `rmdir`
+  * `pread` (and `pread64`)
+  * `pwrite` (and `pwrite64`)
   * `socket` (only for file descriptors mapping handling, we don't replay this one)
   * `pipe` (only for file descriptors mapping handling, we don't replay this one)
   * `dup`, `dup2` and `dup3` (only for file descriptors mapping handling, we don't replay this one)
@@ -23,8 +25,6 @@ Both [ioreplay] and [ioprofiler] process the list of recorded system calls in or
 
 To ensure even better functionality, these additional system calls should be included in the near future:
   * `fstat`
-  * `pread`
-  * `pwrite`
   * `rename`
   * `pipe2`
   * `tee`
