@@ -34,10 +34,26 @@ write_item_t * new_write_item() {
 	return i;
 }
 
+pwrite_item_t * new_pwrite_item() {
+	pwrite_item_t * i;
+
+	i = malloc(sizeof(pwrite_item_t));
+	item_init(&i->item);
+	return i;
+}
+
 read_item_t * new_read_item() {
 	read_item_t * i;
 
 	i = malloc(sizeof(read_item_t));
+	item_init(&i->item);
+	return i;
+}
+
+pread_item_t * new_pread_item() {
+	pread_item_t * i;
+
+	i = malloc(sizeof(pread_item_t));
 	item_init(&i->item);
 	return i;
 }
@@ -165,6 +181,8 @@ int remove_items(list_t * list) {
 	common_op_item_t * com_it;
 	read_item_t * read_it;
 	write_item_t * write_it;
+	pread_item_t * pread_it;
+	pwrite_item_t * pwrite_it;
 	open_item_t * open_it;
 	close_item_t * close_it;
 	unlink_item_t * unlink_it;
@@ -192,6 +210,16 @@ int remove_items(list_t * list) {
 				read_it = (read_item_t *) com_it;
 				item = read_it->item.next;
 				free(read_it);
+				break;
+			case OP_PWRITE:
+				pwrite_it = (pwrite_item_t *) com_it;
+				item = pwrite_it->item.next;
+				free(pwrite_it);
+				break;
+			case OP_PREAD:
+				pread_it = (pread_item_t *) com_it;
+				item = pread_it->item.next;
+				free(pread_it);
 				break;
 			case OP_OPEN:
 				open_it = (open_item_t *) com_it;

@@ -125,6 +125,7 @@ int main(int argc, char * * argv) {
 	char ignorefile[MAX_STRING] = "";
 	char mapfile[MAX_STRING] = "";
 	list_t * list;
+	int len = 0;
 	int retval;
 	int action = 0;
 	int verbose = 0;
@@ -231,7 +232,8 @@ int main(int argc, char * * argv) {
 		return -1;
 	}
 
-	DEBUGPRINTF("Loading done, %zd items loaded.\n", list_length(list));
+	len = list_length(list);
+	DEBUGPRINTF("Loading done, %zd items loaded.\n", len);
 	char * ifilename = ignorefile;
 	if (strlen(ignorefile) == 0) {
 		ifilename = NULL;
@@ -239,6 +241,11 @@ int main(int argc, char * * argv) {
 	char * mfilename = mapfile;
 	if (strlen(mapfile) == 0) {
 		mfilename = NULL;
+	}
+
+	if ( len == 0 ) {
+		fprintf(stdout, "No items loaded, nothin to do --> exiting.\n");
+		return 0;
 	}
 
 	if (action & ACT_CONVERT) {

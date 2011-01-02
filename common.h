@@ -59,7 +59,9 @@
 #define SHM_SIZE (10*1024*1024)
 
 #define OP_WRITE 'w'
+#define OP_PWRITE 'W'
 #define OP_READ 'r'
+#define OP_PREAD 'P'
 
 #define OP_ACCESS 'a'
 #define OP_UNKNOWN '?'
@@ -130,6 +132,23 @@ typedef struct write_op {
 	int64_t retval;
 	op_info_t info;
 } write_op_t;
+
+typedef struct pread_op {
+	int32_t fd;
+	int64_t size;
+	int64_t offset;
+	int64_t retval;
+	op_info_t info;
+} pread_op_t;
+
+typedef struct pwrite_op {
+	int32_t fd;
+	int64_t size;
+	int64_t offset;
+	int64_t retval;
+	op_info_t info;
+} pwrite_op_t;
+
 
 typedef struct pipe_op {
 	int32_t fd1;

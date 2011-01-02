@@ -55,6 +55,8 @@ hash_table_t * simulate_get_map_write();
 inline int simulate_get_open_fd();
 inline void simulate_read(fd_item_t * fd_item, read_item_t * op_it);
 inline void simulate_write(fd_item_t * fd_item, write_item_t * op_it);
+inline void simulate_pread(fd_item_t * fd_item, pread_item_t * op_it);
+inline void simulate_pwrite(fd_item_t * fd_item, pwrite_item_t * op_it);
 void simulate_access(access_op_t * op_it);
 void simulate_stat(stat_op_t * op_it);
 void simulate_mkdir(mkdir_op_t * op_it);

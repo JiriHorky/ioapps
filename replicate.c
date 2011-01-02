@@ -141,8 +141,8 @@ int supported_type(mode_t type) {
 	}
 }
 
-/** Replicates one read operation.
- * @arg op_it operation item structure in which are information about the write operation
+/** Replicates one read read(2) call.
+ * @arg op_it operation item structure in which are information about the read(2) call
  * @arg op_mask whether really replicate or just simulate it. ACT_SIMULATE or ACT_REPLICATE.
  */
 
@@ -191,7 +191,8 @@ void replicate_read(read_item_t * op_it, int op_mask) {
 		} else {
 			assert(0);
 		}
-		fd_item->fd_map->cur_pos += retval;
+		fd_item->fd_map->cur_pos += retval; ///< @todo this should be moved to simulate class!
+
 	
 		if ( op_it->o.size > MAX_DATA) {
 			free(data);
@@ -258,7 +259,7 @@ void replicate_write(write_item_t * op_it, int op_mask) {
 			assert(0);
 		}
 
-		fd_item->fd_map->cur_pos += retval;
+		fd_item->fd_map->cur_pos += retval; ///< @todo this should be moved to simulate class!
 
 		if ( op_it->o.size > MAX_DATA) {
 			free(data);
@@ -271,6 +272,135 @@ void replicate_write(write_item_t * op_it, int op_mask) {
 		}
 	}
 }
+
+/** Replicates one pread(2) operation.
+ * @arg op_it operation item structure in which are information about the pread syscall
+ * @arg op_mask whether really replicate or just simulate it. ACT_SIMULATE or ACT_REPLICATE.
+ */
+
+void replicate_pread(pread_item_t * op_it, int op_mask) {
+	int64_t retval = 0;
+	int fd = op_it->o.fd;
+	fd_item_t * fd_item;
+	int myfd;
+	item_t * fd_map;
+	char * data;
+	int32_t pid = op_it->o.info.pid;
+	hash_table_t * ht;
+
+	ht = get_process_ht(fd_mappings, pid);
+
+	if (! ht) {
+		ERRORPRINTF("HT for pid %d doesn't exist!\n", pid);
+		return;
+	}
+
+	if ( (fd_map = hash_table_find(ht, &fd)) == NULL) {
+		ERRORPRINTF("%d: Can not find mapping for fd: %d. Corresponding open call probably missing. Time:%d.%d\n", pid, fd,  op_it->o.info.start.tv_sec, op_it->o.info.start.tv_usec);
+		//hash_table_dump2(ht, dump_fd_list_item);
+	} else {
+		fd_item = hash_table_entry(fd_map, fd_item_t, item);
+		myfd = fd_item->fd_map->my_fd;
+
+		if ( ! supported_type(fd_item->fd_map->type)) {
+			//DEBUGPRINTF("Unsupported fd (%d -> %d) type: %d\n", fd, myfd, fd_item->fd_map->type);
+			return;
+		}
+		
+		if (op_it->o.size > MAX_DATA) {
+			data = malloc(op_it->o.size);
+		} else {
+			data = data_buffer;
+		}		
+
+		if (op_mask & ACT_SIMULATE) {
+			retval = op_it->o.retval;
+			if (op_it->o.retval != -1) { //do not take unsuccessfull reads into account
+				simulate_pread(fd_item, op_it);
+			}
+		} else if (op_mask & ACT_REPLICATE) {
+			retval = pread(myfd, data_buffer, op_it->o.size, op_it->o.offset);
+		} else {
+			assert(0);
+		}
+	
+		if ( op_it->o.size > MAX_DATA) {
+			free(data);
+		}
+
+		if (retval == -1 && retval != op_it->o.retval) {
+			ERRORPRINTF("%d: Pread from fd %d->%d failed: %s\n", pid, fd, myfd, strerror(errno));
+//			hash_table_dump2(ht, dump_fd_list_item);
+		} else if (retval != op_it->o.size && retval != op_it->o.retval) {
+			DEBUGPRINTF("Warning, %"PRIi64" bytes were successfully pread \
+(expected: %"PRIi64")\n", retval, op_it->o.retval);
+		}
+	}
+}
+
+/** Replicates one pwrite operation.
+ * @arg op_it operation item structure in which are information about the write operation
+ * @arg op_mask whether really replicate or just simulate it. ACT_SIMULATE or ACT_REPLICATE.
+ */
+
+void replicate_pwrite(pwrite_item_t * op_it, int op_mask) {
+	int64_t retval = 0;
+	int fd = op_it->o.fd;
+	fd_item_t * fd_item;
+	int myfd;
+	int32_t pid = op_it->o.info.pid;
+	item_t * fd_map;
+	char * data;
+	hash_table_t * ht;
+
+	ht = get_process_ht(fd_mappings, pid);
+
+	if (! ht) {
+		ERRORPRINTF("HT for pid %d doesn't exist!\n", pid);
+		return;
+	}
+
+	if ( (fd_map = hash_table_find(ht, &fd)) == NULL) {
+		ERRORPRINTF("%d: Can not find mapping for fd: %d. Corresponding open call probably missing.\n", pid, fd);
+	} else {
+		fd_item = hash_table_entry(fd_map, fd_item_t, item);
+		myfd = fd_item->fd_map->my_fd;
+
+		mode_t type = fd_item->fd_map->type;
+		if ( ! supported_type(type)) {
+			//DEBUGPRINTF("Unsupported fd (%d -> %d) type: %d\n", fd, myfd, type);
+			return;
+		}
+
+		if (op_it->o.size > MAX_DATA) {
+			data = malloc(op_it->o.size);
+		} else {
+			data = data_buffer;
+		}		
+
+		if (op_mask & ACT_SIMULATE) {
+			retval = op_it->o.retval;
+			if (op_it->o.retval != -1) { //do not take unsuccessfull writes into account
+				simulate_pwrite(fd_item, op_it);
+			}
+		} else if ( op_mask & ACT_REPLICATE) {
+			retval = pwrite(myfd, data_buffer, op_it->o.size, op_it->o.offset);
+		} else {
+			assert(0);
+		}
+
+		if ( op_it->o.size > MAX_DATA) {
+			free(data);
+		}
+
+		if (retval == -1) {
+			ERRORPRINTF("Pwrite to fd %d failed: %s\n", fd, strerror(errno));
+		} else if (retval != op_it->o.size) {
+			DEBUGPRINTF("Warning, %"PRIi64" bytes were successfully outputed (%"PRIi64" expected)\n", retval, op_it->o.size);
+		}
+	}
+}
+
 
 inline int32_t get_pipe_fd() {
 	static int32_t fd = INT_MAX;
@@ -1041,6 +1171,8 @@ int replicate(list_t * list, int cpu, double scale, int op_mask, char * ifilenam
 	common_op_item_t * com_it;
 	read_item_t * read_it;
 	write_item_t * write_it;
+	pread_item_t * pread_it;
+	pwrite_item_t * pwrite_it;
 	open_item_t * open_it;
 	close_item_t * close_it;
 	unlink_item_t * unlink_it;
@@ -1069,6 +1201,12 @@ int replicate(list_t * list, int cpu, double scale, int op_mask, char * ifilenam
 				break;
 			case OP_READ:
 				REPLICATE(read);
+				break;
+			case OP_PWRITE:
+				REPLICATE(pwrite);
+				break;
+			case OP_PREAD:
+				REPLICATE(pread);
 				break;
 			case OP_OPEN:
 				REPLICATE(open);
