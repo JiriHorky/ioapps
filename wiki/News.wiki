@@ -1,3 +1,0 @@
-#summary List of news in the project
-=News=
-  * New release
