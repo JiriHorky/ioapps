@@ -29,4 +29,6 @@
 #define S_IFIGNORE ((1 << 30)-1) // first 30 bits are 1
 
 int replicate(list_t * list, int cpu, double scale, int sim_mode, char * ifile, char * mfile);
+void replicate_clone(clone_item_t * op_it, int op_mask);
+void replicate_open(open_item_t * op_it, int op_mask);
 #endif
