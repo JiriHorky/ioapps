@@ -53,6 +53,8 @@ hash_table_t * usage_map; /** hashtables of fds which are used by this process -
                           * whether we can really close fd or it is used by another "cloned process"
 								  */
 
+int32_t global_parent_pid = 0;
+int global_fix_missing = 0; /** whether to try to fix missing clone/open calls in trace */
 
 #ifndef PY_MODULE
 extern struct timeval global_start;
@@ -133,6 +135,53 @@ unsigned long long  get_clock_rate() {
 					counter_last = rdtsc(); \
 				} \
 
+
+hash_table_t * replicate_missing_ht(int32_t pid, int op_mask) {
+	if ( ! global_fix_missing ) {
+		ERRORPRINTF("HT for pid %d doesn't exist!\n", pid);
+		return NULL;
+	} else {
+		clone_item_t * op_it = new_clone_item();
+
+		op_it->o.retval = pid;
+		op_it->o.info.pid = global_parent_pid;
+		op_it->o.mode = CLONE_FILES;
+		replicate_clone(op_it, op_mask);
+		free(op_it);
+		return get_process_ht(fd_mappings, pid);
+	}
+}
+
+void replicate_get_missing_name(char * buff, int32_t pid, int32_t fd) {
+	static int i =0;
+
+	sprintf(buff, "UNKNOWN_FILE_%06d_%06d", pid, fd);
+	i++;
+}
+
+item_t * replicate_get_fd_map(hash_table_t * ht, int fd, op_info_t * info, int op_mask) {
+	item_t * fd_map;
+
+	if ( (fd_map = hash_table_find(ht, &fd)) == NULL) {
+		if ( ! global_fix_missing ) {
+			ERRORPRINTF("%d: Can not find mapping for fd: %d. Corresponding open call probably missing. Time:%d.%d\n", info->pid, fd,  info->start.tv_sec, info->start.tv_usec);
+			return NULL;
+		} else {
+			open_item_t * op_it = new_open_item();
+			op_it->o.retval = fd;
+			op_it->o.info.pid = info->pid;
+			replicate_get_missing_name(op_it->o.name, info->pid, fd);
+			op_it->o.flags =  0;
+			op_it->o.info.start = info->start;
+
+			replicate_open(op_it, op_mask);
+			return hash_table_find(ht, &fd);
+		}
+	} else {
+		return fd_map;
+	}
+}
+
 int supported_type(mode_t type) {
 	if ( type == S_IFDIR || type == S_IFREG ) {
 		return  1;
@@ -159,13 +208,14 @@ void replicate_read(read_item_t * op_it, int op_mask) {
 	ht = get_process_ht(fd_mappings, pid);
 
 	if (! ht) {
-		ERRORPRINTF("HT for pid %d doesn't exist!\n", pid);
-		return;
+		ht = replicate_missing_ht(pid, op_mask);
+		if (! ht) {
+			return;
+		}
 	}
 
-	if ( (fd_map = hash_table_find(ht, &fd)) == NULL) {
-		ERRORPRINTF("%d: Can not find mapping for fd: %d. Corresponding open call probably missing. Time:%d.%d\n", pid, fd,  op_it->o.info.start.tv_sec, op_it->o.info.start.tv_usec);
-		//hash_table_dump2(ht, dump_fd_list_item);
+	if ( (fd_map = replicate_get_fd_map(ht, fd, &(op_it->o.info), op_mask)) == NULL) {
+		return;
 	} else {
 		fd_item = hash_table_entry(fd_map, fd_item_t, item);
 		myfd = fd_item->fd_map->my_fd;
@@ -226,12 +276,14 @@ void replicate_write(write_item_t * op_it, int op_mask) {
 	ht = get_process_ht(fd_mappings, pid);
 
 	if (! ht) {
-		ERRORPRINTF("HT for pid %d doesn't exist!\n", pid);
-		return;
+		ht = replicate_missing_ht(pid, op_mask);
+		if (! ht) {
+			return;
+		}
 	}
 
-	if ( (fd_map = hash_table_find(ht, &fd)) == NULL) {
-		ERRORPRINTF("%d: Can not find mapping for fd: %d. Corresponding open call probably missing.\n", pid, fd);
+	if ( (fd_map = replicate_get_fd_map(ht, fd, &(op_it->o.info), op_mask)) == NULL) {
+		return;
 	} else {
 		fd_item = hash_table_entry(fd_map, fd_item_t, item);
 		myfd = fd_item->fd_map->my_fd;
@@ -291,13 +343,13 @@ void replicate_pread(pread_item_t * op_it, int op_mask) {
 	ht = get_process_ht(fd_mappings, pid);
 
 	if (! ht) {
-		ERRORPRINTF("HT for pid %d doesn't exist!\n", pid);
-		return;
+		ht = replicate_missing_ht(pid, op_mask);
+		if (! ht) {
+			return;
+		}
 	}
 
-	if ( (fd_map = hash_table_find(ht, &fd)) == NULL) {
-		ERRORPRINTF("%d: Can not find mapping for fd: %d. Corresponding open call probably missing. Time:%d.%d\n", pid, fd,  op_it->o.info.start.tv_sec, op_it->o.info.start.tv_usec);
-		//hash_table_dump2(ht, dump_fd_list_item);
+	if ( (fd_map = replicate_get_fd_map(ht, fd, &(op_it->o.info), op_mask)) == NULL) {
 	} else {
 		fd_item = hash_table_entry(fd_map, fd_item_t, item);
 		myfd = fd_item->fd_map->my_fd;
@@ -356,12 +408,13 @@ void replicate_pwrite(pwrite_item_t * op_it, int op_mask) {
 	ht = get_process_ht(fd_mappings, pid);
 
 	if (! ht) {
-		ERRORPRINTF("HT for pid %d doesn't exist!\n", pid);
-		return;
+		ht = replicate_missing_ht(pid, op_mask);
+		if (! ht) {
+			return;
+		}
 	}
 
-	if ( (fd_map = hash_table_find(ht, &fd)) == NULL) {
-		ERRORPRINTF("%d: Can not find mapping for fd: %d. Corresponding open call probably missing.\n", pid, fd);
+	if ( (fd_map = replicate_get_fd_map(ht, fd, &(op_it->o.info), op_mask)) == NULL) {
 	} else {
 		fd_item = hash_table_entry(fd_map, fd_item_t, item);
 		myfd = fd_item->fd_map->my_fd;
@@ -434,8 +487,10 @@ void replicate_pipe(pipe_item_t * op_it, int op_mask) {
 	ht = get_process_ht(fd_mappings, pid);
 
 	if (! ht) {
-		DEBUGPRINTF("HT for pid %d doesn't exist! Clone/fork call missing\n", pid);
-		return;
+		ht = replicate_missing_ht(pid, op_mask);
+		if (! ht) {
+			return;
+		}
 	}
 
 	if ( hash_table_find(ht, &fd1) == NULL && hash_table_find(ht, &fd2) == NULL ) { //we didn't open any fd before
@@ -503,9 +558,11 @@ void replicate_open(open_item_t * op_it, int op_mask) {
 	ht = get_process_ht(fd_mappings, pid);
 
 	if (! ht) {
-		ERRORPRINTF("HT for pid %d doesn't exist! Clone/fork call missing\n", pid);
-		delete_fd_item(fd_item);
-		return;
+		ht = replicate_missing_ht(pid, op_mask);
+		if (! ht) {
+			delete_fd_item(fd_item);
+			return;
+		}
 	}
 
 	if ( hash_table_find(ht, &fd) == NULL ) { //we didn't open this file before
@@ -615,11 +672,13 @@ void replicate_close(close_item_t * op_it, int op_mask) {
 	ht = get_process_ht(fd_mappings, pid);
 
 	if (! ht) {
-		ERRORPRINTF("HT for pid %d doesn't exist yet!!!\n", pid);
-		return;
+		ht = replicate_missing_ht(pid, op_mask);
+		if (! ht) {
+			return;
+		}
 	}
 
-	if ( (item = hash_table_find(ht, &fd)) == NULL) { //we didn't open this file before
+	if ( (item = replicate_get_fd_map(ht, fd, &(op_it->o.info), op_mask)) == NULL) { //we didn't open this file before
 		if ( op_it->o.retval != -1 ) {
 			ERRORPRINTF("%d: File descriptor %d is not opened!\n", pid, fd);
 		}
@@ -707,14 +766,16 @@ void replicate_llseek(llseek_item_t * op_it, int op_mask) {
 	ht = get_process_ht(fd_mappings, pid);
 
 	if (! ht) {
-		ERRORPRINTF("HT for pid %d doesn't exist yet!!!\n", pid);
-		return;
+		ht = replicate_missing_ht(pid, op_mask);
+		if (! ht) {
+			return;
+		}
 	}
 
 	high = (off_t) (op_it->o.offset>>32);
 	low = (off_t) (op_it->o.offset & 0xFFFFFFFF);
 
-   if ( (fd_map = hash_table_find(ht, &fd)) == NULL) {
+   if ( (fd_map = replicate_get_fd_map(ht, fd, &(op_it->o.info), op_mask)) == NULL) {
       ERRORPRINTF("%d: Can not find mapping for fd: %d. Corresponding open call probably missing.\n", pid, fd);
    } else {
       fd_item = hash_table_entry(fd_map, fd_item_t, item);
@@ -788,11 +849,13 @@ void replicate_lseek(lseek_item_t * op_it, int op_mask) {
 	ht = get_process_ht(fd_mappings, pid);
 
 	if (! ht) {
-		ERRORPRINTF("HT for pid %d doesn't exist yet!!!\n", pid);
-		return;
+		ht = replicate_missing_ht(pid, op_mask);
+		if (! ht) {
+			return;
+		}
 	}
 
-   if ( (fd_map = hash_table_find(ht, &fd)) == NULL) {
+   if ( (fd_map = replicate_get_fd_map(ht, fd, &(op_it->o.info), op_mask)) == NULL) {
       ERRORPRINTF("%d: Can not find mapping for fd: %d. Corresponding open call probably missing.\n", pid, fd);
    } else {
       fd_item = hash_table_entry(fd_map, fd_item_t, item);
@@ -907,10 +970,12 @@ void replicate_dup(dup_item_t * op_it, int op_mask) {
 	ht = get_process_ht(fd_mappings, pid);
 
 	if (! ht) {
-		ERRORPRINTF("HT for pid %d doesn't exist yet!!!\n", pid);
-		return;
+		ht = replicate_missing_ht(pid, op_mask);
+		if (! ht) {
+			return;
+		}
 	}
-   if ( (it = hash_table_find(ht, &fd)) == NULL) {
+   if ( (it = replicate_get_fd_map(ht, fd, &(op_it->o.info), op_mask)) == NULL) {
       ERRORPRINTF("Can not find mapping for fd: %d. Corresponding open call probably missing.\n", fd);
    } else {
       fd_item = hash_table_entry(it, fd_item_t, item);
@@ -1007,8 +1072,10 @@ void replicate_socket(socket_item_t * op_it, int op_mask) {
 	ht = get_process_ht(fd_mappings, pid);
 
 	if (! ht) {
-		ERRORPRINTF("HT for pid %d doesn't exist! Clone/fork call missing\n", pid);
-		return;
+		ht = replicate_missing_ht(pid, op_mask);
+		if (! ht) {
+			return;
+		}
 	}
 
 	if ( hash_table_find(ht, &fd) == NULL ) { //we didn't open this file before
@@ -1072,6 +1139,8 @@ int replicate_init(int32_t pid, int cpu, char * ifilename, char * mfilename) {
 
 	//create a new ht for the process
 	DEBUGPRINTF("Initializing with pid %d\n", pid);
+	global_parent_pid = pid;
+
 	item_t * item = new_process_ht(pid);
 	process_hash_item_t * h_it = list_entry(item, process_hash_item_t, list_item);
 	list_append(fd_mappings, item);
@@ -1191,6 +1260,10 @@ int replicate(list_t * list, int cpu, double scale, int op_mask, char * ifilenam
 	int64_t diff_orig, diff_real;
 	int64_t diff;
 	uint64_t counter_first, counter_last, counter_real;
+
+	if (op_mask & ACT_SIMULATE) {
+		global_fix_missing = 1;
+	}
 
 	while (item) { 
 		i++;
