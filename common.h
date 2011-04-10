@@ -35,6 +35,8 @@
 #define WHERESTR  "[%s:%s:%d]: "
 #define WHEREARG  __FILE__, __FUNCTION__,  __LINE__
 
+#define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
+
 #ifndef NDEBUG
 #define DEBUGPRINT2(...)       fprintf(stderr, __VA_ARGS__)
 #define DEBUGPRINTF(_fmt, ...)  DEBUGPRINT2(WHERESTR _fmt, WHEREARG, __VA_ARGS__)
@@ -54,6 +56,7 @@
 #define MAX_PARENT_IDS 20
 #define VERSION "1.0"
 
+#define OFFSET_INVAL -1
 
 #define SHM_KEY 0x00BEEF00
 #define SHM_SIZE (10*1024*1024)
@@ -81,6 +84,7 @@
 #define OP_CLONE 'C'
 #define OP_SOCKET 'S'
 #define OP_STAT 's'
+#define OP_SENDFILE 't'
 
 // Timing modes
 #define TIME_DIFF  0x80 ///< Try to hold the same difference between calls
@@ -239,6 +243,15 @@ typedef struct socket_op {
 	int32_t retval;
 	op_info_t info;
 } socket_op_t;
+
+typedef struct sendfile_op {
+	int32_t out_fd;
+	int32_t in_fd;
+	int64_t offset;
+	int64_t size;
+	int64_t retval;
+	op_info_t info;
+} sendfile_op_t;
 
 void * attach_sh_mem();
 

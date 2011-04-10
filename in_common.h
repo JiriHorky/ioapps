@@ -149,6 +149,12 @@ typedef struct socket_item {
 	socket_op_t o;
 } socket_item_t;
 
+typedef struct sendfile_item {	
+	item_t item;
+	char type;
+	sendfile_op_t o;
+} sendfile_item_t;
+
 /* Functions for creating new structures
  */
 
@@ -169,6 +175,7 @@ lseek_item_t * new_lseek_item();
 access_item_t * new_access_item();
 stat_item_t * new_stat_item();
 socket_item_t * new_socket_item();
+sendfile_item_t * new_sendfile_item();
 
 int remove_items(list_t * list);
 

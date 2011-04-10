@@ -53,6 +53,7 @@ typedef struct sim_item_t {
 hash_table_t * simulate_get_map_read();
 hash_table_t * simulate_get_map_write();
 inline int simulate_get_open_fd();
+inline void simulate_sendfile(fd_item_t * in_fd_item, fd_item_t * out_fd_item, sendfile_item_t * op_it);
 inline void simulate_read(fd_item_t * fd_item, read_item_t * op_it);
 inline void simulate_write(fd_item_t * fd_item, write_item_t * op_it);
 inline void simulate_pread(fd_item_t * fd_item, pread_item_t * op_it);

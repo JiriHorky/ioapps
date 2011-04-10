@@ -840,6 +840,61 @@ int strace_read_lseek(char * line, list_t * list) {
 	return 0;
 }
 
+/** Reads sendfile event from strace file.
+ * 
+ *
+ * @arg f file from which to read, must be opened
+ * @arg list list to which to append new structure
+ * @return 0 on success, non-zero otherwise
+ */
+
+int strace_read_sendfile(char * line, list_t * list) {
+	sendfile_item_t * op_item;
+	int retval;
+   char start_time[MAX_TIME_STRING];
+   char dur[MAX_TIME_STRING] = "0";
+
+	op_item = new_sendfile_item();
+	op_item->type = OP_SENDFILE;
+
+	if ((retval = sscanf(line, "%d %s %*[^(](%d, %d, \[%"SCNi64"], %"SCNi64") = %"SCNi64"%*[^<]<%[^>]", &op_item->o.info.pid, start_time, &op_item->o.out_fd,
+					&op_item->o.in_fd, &op_item->o.offset, &op_item->o.size, &op_item->o.retval, dur)) == EOF) {
+		ERRORPRINTF("Error: unexpected end of file%s", "\n");
+		free(op_item);
+		return -1;
+	} 
+
+	if (retval != 8) {
+		if (retval == 4) { //maybe there is "NULL" string instead of [NUMBER] in fifth argument
+			if ((retval = sscanf(line, "%d %s %*[^(](%d, %d, NULL, %"SCNi64") = %"SCNi64"%*[^<]<%[^>]", &op_item->o.info.pid, start_time, &op_item->o.out_fd,
+					&op_item->o.in_fd, &op_item->o.size, &op_item->o.retval, dur)) == EOF) {
+				ERRORPRINTF("Error: unexpected end of file%s", "\n");
+				free(op_item);
+				return -1;
+			} 
+			if (retval != 7) {
+				ERRORPRINTF("Error: It was not able to match all fields required :%d\n", retval);
+				ERRORPRINTF("Failing line: %s\n", line);
+				free(op_item);
+				return -1;
+			} else {
+				op_item->o.offset = OFFSET_INVAL;
+			}
+		} else {
+			ERRORPRINTF("Error: It was not able to match all fields required :%d\n", retval);
+			ERRORPRINTF("Failing line: %s\n", line);
+			free(op_item);
+			return -1;
+		}
+	}
+
+   op_item->o.info.start = read_time(start_time);
+   op_item->o.info.dur = read_duration(dur);
+
+	list_append(list, &op_item->item);
+	return 0;
+}
+
 /** Reads access event from strace file.
  * 
  *
@@ -1051,6 +1106,8 @@ char strace_get_operation_code(char * line, int stats) {
 		return OP_STAT;
 	} else if (! strcmp(operation, "socket")) {
 		return OP_SOCKET;
+	} else if (! strcmp(operation, "sendfile")) {
+		return OP_SENDFILE;
 	}
 	return OP_UNKNOWN;
 }
@@ -1229,6 +1286,11 @@ inline int strace_process_line(char * line, list_t * list, hash_table_t * ht, in
 			break;
 		case OP_SOCKET:
 			if ( (retval = read_socket_strace(line, list)) != 0) {
+				return retval;
+			}
+			break;
+		case OP_SENDFILE:
+			if ( (retval = strace_read_sendfile(line, list)) != 0) {
 				return retval;
 			}
 			break;
