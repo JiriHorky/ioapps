@@ -499,6 +499,29 @@ int bin_read_socket(FILE * f, list_t * list, int64_t num) {
 	return 0;
 }
 
+int bin_read_sendfile(FILE * f, list_t * list, int64_t num) {
+	int rv;
+	int32_t i32;
+	int64_t i64;
+	char c = OP_SENDFILE;	
+	sendfile_item_t * op_it;
+
+	op_it = new_sendfile_item();
+	op_it->type = c;
+
+	read_int32(op_it->o.out_fd);
+	read_int32(op_it->o.in_fd);
+	read_int64(op_it->o.offset);
+	read_int64(op_it->o.size);
+	read_int64(op_it->o.retval);
+	
+	if ( (rv = bin_read_info(f, &op_it->o.info, c, num)) != 0) {
+		BIN_READ_ERROR_FREE;
+	}
+
+	list_append(list, &op_it->item);
+	return 0;
+}
 
 int bin_get_items(char * filename, list_t * list) {
 	FILE * f;
@@ -612,6 +635,12 @@ int bin_get_items(char * filename, list_t * list) {
 				break;
 			case OP_SOCKET:
 				if ( bin_read_socket(f, list, i) != 0 ) {
+					ERRORPRINTF("Error reading binary file: %s\n", filename);
+					return -1;
+				}
+				break;
+			case OP_SENDFILE:
+				if ( bin_read_sendfile(f, list, i) != 0 ) {
 					ERRORPRINTF("Error reading binary file: %s\n", filename);
 					return -1;
 				}
@@ -954,6 +983,26 @@ int bin_save_socket(FILE * f, socket_op_t * op_it) {
 	return 0;
 }
 
+int bin_save_sendfile(FILE * f, sendfile_op_t * op_it) {
+	int rv;
+	int32_t i32;
+	int64_t i64;
+	char c = OP_SENDFILE;
+
+	write_char(c);
+	write_int32(op_it->out_fd);
+	write_int32(op_it->in_fd);
+	write_int64(op_it->offset);
+	write_int64(op_it->size);
+	write_int64(op_it->retval);
+
+	if ( (rv = bin_write_info(f, &op_it->info)) != 0) {
+		BIN_WRITE_ERROR;
+	}
+
+	return 0;
+}
+
 int bin_save_items(char * filename, list_t * list) {
 	FILE * f;
 	long long i = 0;
@@ -976,6 +1025,7 @@ int bin_save_items(char * filename, list_t * list) {
 	access_item_t * access_it;
 	stat_item_t * stat_it;
 	socket_item_t * socket_it;
+	sendfile_item_t * sendfile_it;
 
 	
 	if ((f = fopen(filename, "wb")) == NULL ) {
@@ -1104,6 +1154,13 @@ int bin_save_items(char * filename, list_t * list) {
 			case OP_SOCKET:
 				socket_it = (socket_item_t *) com_it;
 				if ( bin_save_socket(f, &socket_it->o) != 0 ) {
+					ERRORPRINTF("Error saving to binary file %s\n", filename);
+					return -1;
+				}
+				break;
+			case OP_SENDFILE:
+				sendfile_it = (sendfile_item_t *) com_it;
+				if ( bin_save_sendfile(f, &sendfile_it->o) != 0 ) {
 					ERRORPRINTF("Error saving to binary file %s\n", filename);
 					return -1;
 				}

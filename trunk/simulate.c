@@ -207,6 +207,65 @@ inline void simulate_read(fd_item_t * fd_item, read_item_t * op_it) {
 	}
 }
 
+inline void simulate_sendfile(fd_item_t * in_fd_item, fd_item_t * out_fd_item, sendfile_item_t * op_it) {
+	simfs_t * in_simfs;
+	simfs_t * out_simfs;
+	sim_item_t * sim_item_read = NULL;
+	sim_item_t * sim_item_write = NULL;
+	uint64_t off; 
+	
+	out_simfs = simfs_find(out_fd_item->fd_map->name);
+
+	if (in_fd_item) {
+		in_simfs = simfs_find(in_fd_item->fd_map->name);
+		if (sim_mode & ACT_CHECK || sim_mode & ACT_PREPARE) {
+			if ( ! in_simfs) {
+				DEBUGPRINTF("Entry for %s in simfs missing, which might be OK (e.g. tmp file created/unlinked and then written)\n", in_fd_item->fd_map->name);
+				return;
+			}
+
+			if ( op_it->o.offset == OFFSET_INVAL) {
+				off = in_fd_item->fd_map->cur_pos + op_it->o.retval;
+			} else {
+				off = op_it->o.offset + op_it->o.retval;
+			}
+
+			if (in_simfs->virt_size < off) {
+				in_simfs->virt_size = off;
+			}
+		}
+		if (sim_mode & ACT_SIMULATE) {
+			sim_item_read = simulate_get_sim_item(in_fd_item, sim_map_read);
+			if ( op_it->o.offset == OFFSET_INVAL) {
+				off = in_fd_item->fd_map->cur_pos;
+			} else {
+				off = op_it->o.offset;
+			}
+			simulate_append_rw(sim_item_read, op_it->o.size, off, op_it->o.info.start, op_it->o.info.dur, op_it->o.retval);
+		}
+	}
+	if (out_fd_item) {
+		out_simfs = simfs_find(out_fd_item->fd_map->name);
+		if (sim_mode & ACT_CHECK || sim_mode & ACT_PREPARE) {
+			if ( ! out_simfs) {
+				DEBUGPRINTF("Entry for %s in simfs missing, which might be OK (e.g. tmp file created/unlinked and then written)\n", out_fd_item->fd_map->name);
+				return;
+			}
+
+			off = out_fd_item->fd_map->cur_pos + op_it->o.retval;
+
+			if (out_simfs->virt_size < off) {
+				out_simfs->virt_size = off;
+			}
+		}
+		if (sim_mode & ACT_SIMULATE) {
+			sim_item_write = simulate_get_sim_item(out_fd_item, sim_map_write);
+			off = out_fd_item->fd_map->cur_pos;
+			simulate_append_rw(sim_item_write, op_it->o.size, off, op_it->o.info.start, op_it->o.info.dur, op_it->o.retval);
+		}
+	}
+}
+
 inline void simulate_pwrite(fd_item_t * fd_item, pwrite_item_t * op_it) {
 	simfs_t * simfs = simfs_find(fd_item->fd_map->name);
 	sim_item_t * sim_item = NULL;

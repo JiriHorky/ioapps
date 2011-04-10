@@ -16,11 +16,11 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/syscall.h>
+#include <sys/sendfile.h>
 #include <sys/resource.h>
 #include <limits.h>
 #include <fcntl.h>
@@ -55,6 +55,8 @@ hash_table_t * usage_map; /** hashtables of fds which are used by this process -
 
 int32_t global_parent_pid = 0;
 int global_fix_missing = 0; /** whether to try to fix missing clone/open calls in trace */
+int global_devnull_fd = 0;
+int global_devzero_fd = 0;
 
 #ifndef PY_MODULE
 extern struct timeval global_start;
@@ -891,6 +893,124 @@ void replicate_lseek(lseek_item_t * op_it, int op_mask) {
 #endif
 }
 
+/** Replicates one sendfile operation.
+ * 
+ * @arg op_it operation item structure in which are information about the sendfile operation
+ * @arg op_mask whether really replicate or just simulate it. ACT_SIMULATE or ACT_REPLICATE.
+ */
+
+void replicate_sendfile(sendfile_item_t * op_it, int op_mask) {
+	int64_t retval;
+	int32_t out_fd = op_it->o.out_fd;
+	int32_t in_fd = op_it->o.in_fd;
+	int32_t out_myfd;
+	int32_t in_myfd;
+	item_t * out_fd_map;
+	item_t * in_fd_map;
+	fd_item_t * out_fd_item;
+	fd_item_t * in_fd_item;
+	int32_t pid = op_it->o.info.pid;
+	hash_table_t * ht;
+	ht = get_process_ht(fd_mappings, pid);
+
+	if (! ht) {
+		ht = replicate_missing_ht(pid, op_mask);
+		if (! ht) {
+			return;
+		}
+	}
+
+	if ( (out_fd_map = replicate_get_fd_map(ht, out_fd, &(op_it->o.info), op_mask)) == NULL) {
+		return;
+	} else {
+		if ( (in_fd_map = replicate_get_fd_map(ht, in_fd, &(op_it->o.info), op_mask)) == NULL) {
+			return;
+		}
+
+		out_fd_item = hash_table_entry(out_fd_map, fd_item_t, item);
+		in_fd_item = hash_table_entry(in_fd_map, fd_item_t, item);
+
+		out_myfd = out_fd_item->fd_map->my_fd;
+		in_myfd = in_fd_item->fd_map->my_fd;
+
+		mode_t in_type = in_fd_item->fd_map->type;
+		mode_t out_type = out_fd_item->fd_map->type;
+	
+		if ( supported_type(in_type) &&  supported_type(out_type)) { //both fd types are supported
+			if ( op_mask & ACT_REPLICATE) {
+				retval = sendfile(out_myfd, in_myfd, &op_it->o.offset, op_it->o.size);
+			} else if ( op_mask & ACT_SIMULATE) {
+				if ( op_it->o.retval != -1 ) {
+					simulate_sendfile(in_fd_item, out_fd_item, op_it);
+				}
+				retval = op_it->o.retval;
+			}
+		} else if ( ! supported_type(in_type) && ! supported_type(out_type)) { //none of the types is supported 
+			return;
+		} else if ( ! supported_type(in_type)) { //just out is supported (this is a bit strange....)
+			if ( op_mask & ACT_REPLICATE) {
+			#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23) /* sendfile now supports file-to-file (and not only file-to-socket) operations */
+				//we simulate it using /dev/zero device
+				retval = sendfile(out_myfd, global_devzero_fd, &op_it->o.offset, op_it->o.size);
+			#else
+				//we can't use sendfile(2), but at least access the disk via write() syscall
+				char * buff = malloc(op_it->o.size);
+				if ( op_it->o.offset == OFFSET_INVAL ) {
+					retval = write(out_myfd, buff, op_it->o.size);
+				} else {
+					retval = pwrite(out_myfd, buff, op_it->o.size, op_it->o.offset);
+				}
+				free(buff);
+			#endif
+			} else if ( op_mask & ACT_SIMULATE) {
+				if ( op_it->o.retval != -1 ) {
+					simulate_sendfile(NULL, out_fd_item, op_it);
+				}
+				retval = op_it->o.retval;
+			}
+		} else if ( ! supported_type(out_type)) { //just in is supported (the most likely case)
+			if ( op_mask & ACT_REPLICATE) {
+			#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23) /* sendfile now supports file-to-file (and not only file-to-socket) operations */
+				//we simulate it using /dev/null device
+				retval = sendfile(global_devnull_fd, in_myfd, &op_it->o.offset, op_it->o.size);
+			#else
+				//we can't use sendfile(2), but at least access the disk via read() syscall
+				char * buff = malloc(op_it->o.size);
+				if ( op_it->o.offset == OFFSET_INVAL ) {
+					retval = read(in_myfd, buff, op_it->o.size);
+				} else {
+					retval = pread(in_myfd, buff, op_it->o.size, op_it->o.offset);
+				}
+				free(buff);
+			#endif
+			} else if ( op_mask & ACT_SIMULATE) {
+				if ( op_it->o.retval != -1 ) {
+					simulate_sendfile(in_fd_item, NULL, op_it);
+				}
+				retval = op_it->o.retval;
+			}
+		}
+		//check retval
+		if (retval == -1 && retval != op_it->o.retval) {
+			ERRORPRINTF("sendfile with time %d.%d from %d to %d failed (which was not expected): %s\n",
+					op_it->o.info.start.tv_sec, op_it->o.info.start.tv_usec, op_it->o.in_fd, op_it->o.out_fd, strerror(errno));
+		} else if (retval != op_it->o.retval) {
+			ERRORPRINTF("sendfile's retval (%"PRIi64") is different from what expected(%"PRIi64")\n",
+					retval, op_it->o.retval);
+			if ( op_it->o.offset == OFFSET_INVAL ) { //i.e. NULL pointer value, offset is updated
+				in_fd_item->fd_map->cur_pos += retval;	
+			}
+			out_fd_item->fd_map->cur_pos += retval;
+		} else {
+			if ( op_it->o.offset == OFFSET_INVAL ) { //i.e. NULL pointer value, offset is updated
+				in_fd_item->fd_map->cur_pos += op_it->o.size;
+			}
+			out_fd_item->fd_map->cur_pos += retval;
+		}
+		return;
+	}
+}
+
 /** Replicates one mkdir operation.
  * @arg op_it operation item structure in which are information about the _llseek operation
  * @arg op_mask whether really replicate or just simulate it. ACT_SIMULATE or ACT_REPLICATE.
@@ -1183,6 +1303,18 @@ int replicate_init(int32_t pid, int cpu, char * ifilename, char * mfilename) {
 	gettimeofday(&start_time, NULL);
 	DEBUGPRINTF("Time elapsed so far: %lf\n", TIMEVAL_DIFF(start_time, global_start)/1000000.0);
 #endif
+	
+	global_devnull_fd = open("/dev/null", O_WRONLY);
+	if ( global_devnull_fd == -1 ) {
+		ERRORPRINTF("Error opening /dev/null: %s", strerror(errno));
+		return -1;
+	}
+
+	global_devzero_fd = open("/dev/zero", O_RDONLY);
+	if ( global_devnull_fd == -1 ) {
+		ERRORPRINTF("Error opening /dev/zero: %s", strerror(errno));
+		return -1;
+	}
 
 	return 0;
 }
@@ -1255,6 +1387,7 @@ int replicate(list_t * list, int cpu, double scale, int op_mask, char * ifilenam
 	access_item_t * access_it;
 	stat_item_t * stat_it;
 	socket_item_t * socket_it;
+	sendfile_item_t * sendfile_it;
 	uint64_t last_call_orig; ///< when was the last original call made
 	uint64_t first_call_orig; ///< when was the first original call made
 	int64_t diff_orig, diff_real;
@@ -1321,6 +1454,9 @@ int replicate(list_t * list, int cpu, double scale, int op_mask, char * ifilenam
 				break;
 			case OP_SOCKET:
 				REPLICATE(socket);
+				break;
+			case OP_SENDFILE:
+				REPLICATE(sendfile);
 				break;
 			default:
 				ERRORPRINTF("Unknown operation identifier: '%c'\n", com_it->type);

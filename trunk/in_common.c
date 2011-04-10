@@ -168,6 +168,15 @@ socket_item_t * new_socket_item() {
 	item_init(&i->item);
 	return i;
 }
+
+sendfile_item_t * new_sendfile_item() {
+	sendfile_item_t * i;
+
+	i = malloc(sizeof(sendfile_item_t));
+	item_init(&i->item);
+	return i;
+}
+
 /** Removes and unallocates lists of syscalls.
  *
  * @arg list list of syscalls to delete
@@ -196,6 +205,7 @@ int remove_items(list_t * list) {
 	access_item_t * access_it;
 	stat_item_t * stat_it;
 	socket_item_t * socket_it;
+	sendfile_item_t * sendfile_it;
 
 	while (item) { 
 		i++;
@@ -287,6 +297,11 @@ int remove_items(list_t * list) {
 				socket_it = (socket_item_t *) com_it;
 				item = socket_it->item.next;
 				free(socket_it);
+				break;
+			case OP_SENDFILE:
+				sendfile_it = (sendfile_item_t *) com_it;
+				item = sendfile_it->item.next;
+				free(sendfile_it);
 				break;
 			default:
 				ERRORPRINTF("Unknown operation identifier: '%c'\n", com_it->type);
