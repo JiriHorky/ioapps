@@ -10,7 +10,8 @@ Besides many advantages, usage of `strace` as a source of traces has its limitat
 
 = Features =
   * Very easy to use
-  * 20 system calls processed, see [SystemCallList list]. 
+  * More then 20 system calls processed, see [SystemCallList list]. 
+  * Ability to trace *already running programs*!
   * Ability to trace *all children processes* spawned by the traced parent process. You *can* trace complicated jobs that execute many child scripts.
   * Intelligent and fast file descriptor-to-file name mapping, written in C for performance
    * this includes handling of {{{ dup, dup2, dup3, pipe, socket, clone }}} system calls.
@@ -24,7 +25,10 @@ A picture is worth a thousand words, so please see [IOProfilerScreenshots screen
 {{{
 strace -q -a1 -s0 -f -tttT -oOUT_FILE -e trace=file,desc,process,socket APPLICATION ARGUMENTS
 }}}
-  * _optionally_ [IOReplayConvert convert] the OUT_FILE to a binary form using [ioreplay]
+  * _optionally_ [IOReplayConvert convert] the OUT_FILE to a binary form using [ioreplay] :
+{{{
+ioreplay -c -f OUT_FILE -o OUT_FILE.bin
+}}}
   * run ioprofiler.py and load the OUT_FILE or a converted binary file OUT_FILE.bin
 
 = Installation =
