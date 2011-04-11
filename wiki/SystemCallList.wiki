@@ -14,6 +14,7 @@ Both [ioreplay] and [ioprofiler] process the list of recorded system calls in or
   * `stat` (and `stat64`)
   * `unlink`
   * `rmdir`
+  * `sendfile`
   * `pread` (and `pread64`)
   * `pwrite` (and `pwrite64`)
   * `socket` (only for file descriptors mapping handling, we don't replay this one)
