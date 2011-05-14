@@ -142,7 +142,7 @@ int main(int argc, char * * argv) {
 	gettimeofday(&global_start, NULL);
 
 	/* Parse parameters */
-	while ((c = getopt_long (argc, argv, "b:cCf:F:hi:m:o:rs:St:vV", ioreplay_options, NULL)) != -1 ) {
+	while ((c = getopt_long (argc, argv, "b:cCf:F:hi:m:Mo:rs:St:vV", ioreplay_options, NULL)) != -1 ) {
 		switch (c) {
 			case 'b':
 				cpu = atoi(optarg);
@@ -168,6 +168,9 @@ int main(int argc, char * * argv) {
 				break;
 			case 'm':
 				strncpy(mapfile, optarg, MAX_STRING);
+				break;
+			case 'M':
+				action |= ACT_SIMULATE;
 				break;
 			case 'o':
 				strncpy(output, optarg, MAX_STRING);

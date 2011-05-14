@@ -43,9 +43,10 @@
 #define DUR_TIME(x) ((uint32_t)(x->o.info.dur))
 
 extern hash_table_operations_t ht_ops_fdusage;
+extern hash_table_operations_t ht_ops_fdmapping;
 
 char data_buffer[MAX_DATA];
-list_t * fd_mappings; /** list of hashtables - one hashtable for each process id. The hashtable for process is used for
+hash_table_t * fd_mappings; /** list (actually a hashtable) of hashtables - one hashtable for each process id. The hashtable for process is used for
 							  * mappings of file descriptors recorded --> actually used.
 							  */
 
@@ -321,8 +322,8 @@ void replicate_write(write_item_t * op_it, int op_mask) {
 
 		if (retval == -1) {
 			ERRORPRINTF("Write to fd %d failed: %s\n", fd, strerror(errno));
-		} else if (retval != op_it->o.size) {
-			DEBUGPRINTF("Warning, %"PRIi64" bytes were successfully outputed (%"PRIi64" expected)\n", retval, op_it->o.size);
+		} else if (retval != op_it->o.retval) {
+			DEBUGPRINTF("Warning, %"PRIi64" bytes were successfully outputed (%"PRIi64" expected)\n", retval, op_it->o.retval);
 		}
 	}
 }
@@ -450,8 +451,8 @@ void replicate_pwrite(pwrite_item_t * op_it, int op_mask) {
 
 		if (retval == -1) {
 			ERRORPRINTF("Pwrite to fd %d failed: %s\n", fd, strerror(errno));
-		} else if (retval != op_it->o.size) {
-			DEBUGPRINTF("Warning, %"PRIi64" bytes were successfully outputed (%"PRIi64" expected)\n", retval, op_it->o.size);
+		} else if (retval != op_it->o.retval) {
+			DEBUGPRINTF("Warning, %"PRIi64" bytes were successfully outputed (%"PRIi64" expected)\n", retval, op_it->o.retval);
 		}
 	}
 }
@@ -641,7 +642,7 @@ void replicate_clone(clone_item_t * op_it, int op_mask) {
 	}
 
 	item_t * item = new_process_ht(pid);
-	process_hash_item_t * h_it = list_entry(item, process_hash_item_t, list_item);
+	process_hash_item_t * h_it = hash_table_entry(item, process_hash_item_t, item);
 	if (op_it->o.mode & CLONE_FILES) { //we should have the same FD table
 		free(h_it->ht); //we don't want our own ht, because we just want a pointer to the same list
 		h_it->ht = get_process_ht(fd_mappings, op_it->o.info.pid);
@@ -650,7 +651,7 @@ void replicate_clone(clone_item_t * op_it, int op_mask) {
 		h_it->ht  = duplicate_process_ht(get_process_ht(fd_mappings, op_it->o.info.pid), usage_map);	
 	}
 
-	list_append(fd_mappings, &h_it->list_item);
+	hash_table_insert(fd_mappings, &h_it->pid, &h_it->item);
 	//hash_table_dump2(h_it->ht, dump_fd_list_item);
 	//list_dump(fd_mappings, dump_process_hash_list_item);
 }
@@ -1248,10 +1249,11 @@ int replicate_init(int32_t pid, int cpu, char * ifilename, char * mfilename) {
 		return -1;
 	}
 
-	fd_mappings = malloc(sizeof(list_t));
+	fd_mappings = malloc(sizeof(hash_table_t));
 	usage_map = malloc(sizeof(hash_table_t));
 
-	list_init(fd_mappings); 
+	//init fd_mappings
+	hash_table_init(fd_mappings, HASH_TABLE_SIZE, &ht_ops_fdmapping);
 
 	//Init usage_map
 	hash_table_init(usage_map, HASH_TABLE_SIZE, &ht_ops_fdusage);
@@ -1262,8 +1264,8 @@ int replicate_init(int32_t pid, int cpu, char * ifilename, char * mfilename) {
 	global_parent_pid = pid;
 
 	item_t * item = new_process_ht(pid);
-	process_hash_item_t * h_it = list_entry(item, process_hash_item_t, list_item);
-	list_append(fd_mappings, item);
+	process_hash_item_t * h_it = hash_table_entry(item, process_hash_item_t, item);
+	hash_table_insert(fd_mappings, &h_it->pid, &h_it->item);
 	ht = h_it->ht;
 
 	fd_item = new_fd_item();
@@ -1323,8 +1325,8 @@ int replicate_init(int32_t pid, int cpu, char * ifilename, char * mfilename) {
  */
 
 void replicate_finish() {
-	item_t * i;
-	process_hash_item_t * process_ht_item;
+//	item_t * i;
+//	process_hash_item_t * process_ht_item;
 
 #ifndef PY_MODULE	
 	struct timeval cur_time;
@@ -1335,20 +1337,16 @@ void replicate_finish() {
 
 	namemap_finish();
 
-	i = fd_mappings->head;
-	while(i) {
-		process_ht_item = list_entry(i, process_hash_item_t, list_item);
-		i = i->next;
-///< @todo get rif of process_map_hts & fd_maps. This is tricky, as they are shared across processes,
+///< @todo get rif of process_map_hts & fd_maps & fd_mappings hashmap. This is tricky, as they are shared across processes,
 //   so one can't just iterate throw them and blindly delete them
 //		hash_table_apply(process_ht_item->ht, fd_item_remove_fd_map);
 //		hash_table_destroy(process_ht_item->ht);
 //		free(process_ht_item->ht);
 //		free(process_ht_item);
-	}
+//	}
 	
 	hash_table_destroy(usage_map);
-	free(fd_mappings);
+//	free(fd_mappings);
 	free(usage_map);
 
 }
