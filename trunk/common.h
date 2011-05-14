@@ -85,6 +85,7 @@
 #define OP_SOCKET 'S'
 #define OP_STAT 's'
 #define OP_SENDFILE 't'
+#define OP_FCNTL 'f'
 
 // Timing modes
 #define TIME_DIFF  0x80 ///< Try to hold the same difference between calls

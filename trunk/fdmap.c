@@ -38,9 +38,23 @@ static int ht_compare_fditem(key_t *key, item_t *item) {
 	return fd_item->old_fd == *key;
 }
 
+static int ht_compare_processhash(key_t *key, item_t *item) {
+	process_hash_item_t * p_item;
+
+	p_item = hash_table_entry(item, process_hash_item_t, item);
+	return p_item->pid == *key;
+}
+
 static inline void ht_remove_callback_fdusage(item_t * item) {
 	fd_usage_t * fd_usage = hash_table_entry(item, fd_usage_t, item);	
 	free(fd_usage);
+	return;
+}
+
+static inline void ht_remove_callback_processhash(item_t * item) {
+	process_hash_item_t * p_item;
+	p_item = hash_table_entry(item, process_hash_item_t, item);
+	free(p_item);
 	return;
 }
 
@@ -65,6 +79,13 @@ hash_table_operations_t ht_ops_fdusage = {
 	.remove_callback = ht_remove_callback_fdusage /* = NULL if not used */
 };
 
+/** hash table operations. */
+///< @todo why is the previous one is static and this can't be using extern?
+hash_table_operations_t ht_ops_fdmapping = {
+	.hash = ht_hash_int,
+	.compare = ht_compare_processhash,
+	.remove_callback = ht_remove_callback_processhash /* = NULL if not used */
+};
 
 /** Frees fd_map structure of fd_item. Useful when deleting  whole ht_process_map_t using
  * remove callback of ht.
@@ -88,19 +109,17 @@ void fd_item_remove_fd_map(item_t * item) {
  * @return returns hash table of fd mappings for process with pid @a pid, or NULL if such mapping doesn't exist.
  */
 
-hash_table_t * get_process_ht(list_t * fd_mappings, int32_t pid) {
-	hash_table_t * ht = NULL;
+hash_table_t * get_process_ht(hash_table_t * fd_mappings, int32_t pid) {
 	process_hash_item_t * p_item;
-	item_t * it = fd_mappings->head;
+	item_t * process_ht_item;
 
-	while (it) {
-		p_item = list_entry(it, process_hash_item_t, list_item);
+	if ( (process_ht_item = hash_table_find(fd_mappings, &pid)) != NULL ) {
+		p_item = hash_table_entry(process_ht_item, process_hash_item_t, item);
 		if ( pid == p_item->pid) {
 			return (p_item->ht);
 		}
-		it = it->next;
 	}
-	return ht;
+	return NULL;
 }
 
 
@@ -115,11 +134,11 @@ item_t * new_process_ht(int32_t pid) {
 	process_hash_item_t * p_ht_it = malloc(sizeof(process_hash_item_t));
 	p_ht_it->ht = malloc(sizeof(hash_table_t));
 
-	item_init(&p_ht_it->list_item);
+	item_init(&p_ht_it->item);
 	hash_table_init(p_ht_it->ht, HASH_TABLE_SIZE, &ht_ops_fditem);
 	p_ht_it->pid = pid;
 
-	return &p_ht_it->list_item;
+	return &p_ht_it->item;
 }
 
 /** Deletes fd mappings for process with pid @a pid from the list @fd_mappings.
@@ -128,20 +147,13 @@ item_t * new_process_ht(int32_t pid) {
  * @arg pid process id
  */
 
-void delete_process_ht(list_t * fd_mappings, int32_t pid) {
-	item_t * it = fd_mappings->head;
-	process_hash_item_t * p_item;
+void delete_process_ht(hash_table_t * fd_mappings, int32_t pid) {
+	item_t * process_ht_item;
 
-	while (it) {
-		p_item = list_entry(it, process_hash_item_t, list_item);
-		if ( pid == p_item->pid) {
-			list_remove(fd_mappings, it);
-			hash_table_destroy(p_item->ht);
-			free(p_item->ht);
-			free(p_item);
-			return;
-		}
-		it = it->next;
+	if ( (process_ht_item = hash_table_find(fd_mappings, &pid)) != NULL ) {
+		hash_table_remove(fd_mappings, &pid);
+	} else {
+		ERRORPRINTF("Can not find pid %"PRIi32" when removing delete_process_ht\n", pid);
 	}
 }
 
@@ -197,7 +209,7 @@ void dump_fd_list_item(item_t * it) {
 }
 
 void dump_process_hash_list_item(item_t * it) {
-	process_hash_item_t  * p_it = list_entry(it, process_hash_item_t, list_item);
+	process_hash_item_t  * p_it = hash_table_entry(it, process_hash_item_t, item);
 	fprintf(stderr, " %d", p_it->pid);
 
 }

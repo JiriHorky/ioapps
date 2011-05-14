@@ -1108,6 +1108,8 @@ char strace_get_operation_code(char * line, int stats) {
 		return OP_SOCKET;
 	} else if (! strcmp(operation, "sendfile")) {
 		return OP_SENDFILE;
+	} else if (! strcmp(operation, "fcntl")) {
+		return OP_FCNTL;
 	}
 	return OP_UNKNOWN;
 }
@@ -1187,6 +1189,14 @@ inline int strace_process_line(char * line, list_t * list, hash_table_t * ht, in
 			return 0;
 		}
 	}
+			//just for now.
+			int32_t pid;
+			char start_time[20];
+			char dur[20];
+			int32_t old_fd;
+			int32_t new_fd;
+			int32_t tmp;
+
 
 	switch(c) {
 		case OP_WRITE:
@@ -1292,6 +1302,21 @@ inline int strace_process_line(char * line, list_t * list, hash_table_t * ht, in
 		case OP_SENDFILE:
 			if ( (retval = strace_read_sendfile(line, list)) != 0) {
 				return retval;
+			}
+			break;
+		case OP_FCNTL:
+			//just for now.
+			if ( strstr(line, "F_DUPFD")) {
+				retval = sscanf(line, "%d %s %*[^(](%d, F_DUPFD, %d) = %d%*[^<]<%[^>]", &pid, start_time, &old_fd, &tmp, &new_fd, dur);
+				if (retval != 6 ) {
+					ERRORPRINTF("Can not parse line:, %s", line);
+					return -1;
+				} else {
+					sprintf(line, "%d %s dup(%d) = %d <%s>", pid, start_time, old_fd, new_fd, dur);
+				}
+				if ( (retval = strace_read_dup(line, list)) != 0) {
+					return retval;
+				}
 			}
 			break;
 		case OP_UNKNOWN: // just skip unknown operations

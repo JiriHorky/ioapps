@@ -58,15 +58,15 @@ typedef struct fd_usage {
  */
 
 typedef struct process_hash_item {
-	item_t list_item; // I am part of the list
+	item_t item; // I am part of the list
 	hash_table_t * ht; // file descriptor table
 	int32_t pid; 
 } process_hash_item_t;
 
-hash_table_t * get_process_ht(list_t * fd_mappings, int32_t pid);
+hash_table_t * get_process_ht(hash_table_t * fd_mappings, int32_t pid);
 item_t * new_process_ht(int32_t pid);
 hash_table_t * duplicate_process_ht(hash_table_t * h, hash_table_t * usage_map);
-void delete_process_ht(list_t * fd_mappings, int32_t pid);
+void delete_process_ht(hash_table_t * fd_mappings, int32_t pid);
 
 inline void increase_fd_usage(hash_table_t * h, int32_t fd);
 inline int decrease_fd_usage(hash_table_t * h, int32_t fd);
