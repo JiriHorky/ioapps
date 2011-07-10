@@ -38,7 +38,9 @@
 static struct option ioreplay_options[] = {
    /* name        has_arg flag  value */
    { "bind",			1,		NULL,	'b' },
-   { "convert",			0,		NULL,	'c' },
+   { "convert",		0,		NULL,	'c' },
+   { "check",			0,		NULL,	'C' },
+   { "dont-fix",		0,		NULL,	'd' },
    { "file",			1,		NULL,	'f' },
    { "format",			1,		NULL,	'F' },
    { "help",			0,		NULL,	'h' },
@@ -77,6 +79,7 @@ printf("\n\
  -C --check          checks that all operations recorded in the file specied by -f will\n\
                      succeed (ie. will result in same return code).\n\
                      It takes -i and -m into account. See also -p.\n\
+ -d --dont-fix       turns off fixing of missing system calls (uncomplete strace output support)\n\
  -f --file <file>    sets filename to <file>\n\
  -F --format <fmt>   specifies input format of the file.\n\
                      Options: " FORMAT_STRACE ", " FORMAT_BIN ".\n\
@@ -127,7 +130,7 @@ int main(int argc, char * * argv) {
 	list_t * list;
 	int len = 0;
 	int retval;
-	int action = 0;
+	int action = FIX_MISSING;
 	int verbose = 0;
 	char c;
 	int cpu;
@@ -142,7 +145,7 @@ int main(int argc, char * * argv) {
 	gettimeofday(&global_start, NULL);
 
 	/* Parse parameters */
-	while ((c = getopt_long (argc, argv, "b:cCf:F:hi:m:Mo:rs:St:vV", ioreplay_options, NULL)) != -1 ) {
+	while ((c = getopt_long (argc, argv, "b:cCdf:F:hi:m:Mo:rs:St:vV", ioreplay_options, NULL)) != -1 ) {
 		switch (c) {
 			case 'b':
 				cpu = atoi(optarg);
@@ -152,6 +155,10 @@ int main(int argc, char * * argv) {
 				break;
 			case 'C':
 				action |= ACT_CHECK;
+				break;
+			case 'd':
+				action &= ~FIX_MISSING; //turn off fixing missing calls feature
+				fprintf(stderr, "Turning off fix_missing...\n");
 				break;
 			case 'f':
 				strncpy(filename, optarg, MAX_STRING);
@@ -236,7 +243,7 @@ int main(int argc, char * * argv) {
 	}
 
 	len = list_length(list);
-	DEBUGPRINTF("Loading done, %zd items loaded.\n", len);
+	DEBUGPRINTF("Loading done, %d items loaded.\n", len);
 	char * ifilename = ignorefile;
 	if (strlen(ignorefile) == 0) {
 		ifilename = NULL;
@@ -256,20 +263,20 @@ int main(int argc, char * * argv) {
 		bin_save_items(output, list);
 	} else if (action & ACT_SIMULATE) {
 		simulate_init(ACT_SIMULATE);
-		if (replicate(list, cpu, scale, ACT_SIMULATE, ifilename, mfilename) != 0) {
+		if (replicate(list, cpu, scale, action, ifilename, mfilename) != 0) {
 			ERRORPRINTF("An error occurred during replicating.%s", "\n");
 		}
 		simulate_finish();
 	} else if (action & ACT_CHECK) {
 		simulate_init(ACT_CHECK);
-		if (replicate(list, cpu, scale, ACT_SIMULATE, ifilename, mfilename) != 0) {
+		if (replicate(list, cpu, scale, action | ACT_SIMULATE, ifilename, mfilename) != 0) {
 			ERRORPRINTF("An error occurred during replicating.%s", "\n");
 		}
 		simulate_check_files();
 		simulate_finish();
 	} else if (action & ACT_PREPARE) {
 		simulate_init(ACT_PREPARE);
-		if (replicate(list, cpu, scale, ACT_SIMULATE, ifilename, mfilename) != 0) {
+		if (replicate(list, cpu, scale, action, ifilename, mfilename) != 0) {
 			ERRORPRINTF("An error occurred during replicating.%s", "\n");
 		}
 		///< @todo to change

@@ -103,6 +103,7 @@
 #define ACT_STATS 0x8
 #define ACT_CHECK 0x10
 #define ACT_PREPARE 0x20
+#define FIX_MISSING 0x40
 
 /** Our own version of struct timeval structure - the reason for it is to make sure
 	it will be of equal size on both 32 and 64bit platforms. It will overflow in some
