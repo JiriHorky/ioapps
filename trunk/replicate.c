@@ -55,7 +55,7 @@ hash_table_t * usage_map; /** hashtables of fds which are used by this process -
 								  */
 
 int32_t global_parent_pid = 0;
-int global_fix_missing = 0; /** whether to try to fix missing clone/open calls in trace */
+int global_fix_missing = 1; /** whether to try to fix missing clone/open calls in trace */
 int global_devnull_fd = 0;
 int global_devzero_fd = 0;
 
@@ -567,16 +567,16 @@ void replicate_open(open_item_t * op_it, int op_mask) {
 			return;
 		}
 	}
+	
+	flags = op_it->o.flags;
+	name = namemap_get_name(op_it->o.name);
+	if ( name == NULL ) { // I should ignore it
+		//DEBUGPRINTF("Ignoring opening of file %s\n", op_it->o.name);
+		flags |= O_IGNORE;
+		name = op_it->o.name;
+	}
 
 	if ( hash_table_find(ht, &fd) == NULL ) { //we didn't open this file before
-		flags = op_it->o.flags;
-
-		name = namemap_get_name(op_it->o.name);
-		if ( name == NULL ) { // I should ignore it
-			//DEBUGPRINTF("Ignoring opening of file %s\n", op_it->o.name);
-			flags |= O_IGNORE;
-			name = op_it->o.name;
-		}
 
 		if (op_mask & ACT_REPLICATE && ! (flags & O_IGNORE) ) { //i should replicate and not ignore it
 			if (op_it->o.mode == MODE_UNDEF) { //we know, that we don't want to use mode flag at all
@@ -620,6 +620,9 @@ void replicate_open(open_item_t * op_it, int op_mask) {
 			//DEBUGPRINTF("%d: File %s inserted with key %d->%d\n", pid, name, op_it->o.retval, retval);
 		}
 	} else {
+		if ( flags & O_IGNORE ) {
+			return;
+		}
 		ERRORPRINTF("%d: File %s is already opened!\n", pid, op_it->o.name);
 		delete_fd_item(fd_item);
 	}
@@ -795,6 +798,7 @@ void replicate_llseek(llseek_item_t * op_it, int op_mask) {
 			retval = syscall(SYS__llseek, myfd, high, low, &result, op_it->o.flag);
 #else 
 			retval = lseek(myfd, op_it->o.offset, op_it->o.flag);
+			result = retval;
 #endif
 		} else {
 			result = op_it->o.f_offset;
@@ -809,8 +813,8 @@ void replicate_llseek(llseek_item_t * op_it, int op_mask) {
 			ERRORPRINTF("lseek with time %d.%d of file with %d failed (which was not expected): %s, %d\n",
 					op_it->o.info.start.tv_sec, op_it->o.info.start.tv_usec, op_it->o.fd, strerror(errno), errno);
 		} else if (result != op_it->o.f_offset) {
-			ERRORPRINTF("_llseek's final offset (%"PRIi64") is different from what expected(%"PRIi64")\n",
-					result, op_it->o.f_offset);
+			ERRORPRINTF("_llseek's final offset (%"PRIi64") is different from what expected(%"PRIi64"), time: %d.%d\n",
+					result, op_it->o.f_offset, op_it->o.info.start.tv_sec, op_it->o.info.start.tv_usec);
 			if (op_mask & ACT_SIMULATE) {
 				fd_item->fd_map->cur_pos = op_it->o.f_offset;
 			}
@@ -901,7 +905,7 @@ void replicate_lseek(lseek_item_t * op_it, int op_mask) {
  */
 
 void replicate_sendfile(sendfile_item_t * op_it, int op_mask) {
-	int64_t retval;
+	int64_t retval = 0;
 	int32_t out_fd = op_it->o.out_fd;
 	int32_t in_fd = op_it->o.in_fd;
 	int32_t out_myfd;
@@ -1231,7 +1235,7 @@ int replicate_init(int32_t pid, int cpu, char * ifilename, char * mfilename) {
 	int i;
 
 #ifndef PY_MODULE
-	/* Make sure we are bounded only to first processor. This is important when using program counter as they differ per processor */
+	/* Make sure we are bounded only to a particular processor. This is important when using program counter as they differ per processor */
 	cpu_set_t mask;; /* processors to bind */
 	CPU_ZERO(&mask);
 	CPU_SET(cpu, &mask);
@@ -1239,9 +1243,6 @@ int replicate_init(int32_t pid, int cpu, char * ifilename, char * mfilename) {
 	if (sched_setaffinity(0, len, (cpu_set_t *)&mask) < 0) {
 	    perror("sched_setaffinity");
 	}
-	fprintf(stderr, "Determining clock rate..");
-	clock_rate = get_clock_rate();
-	fprintf(stderr, ": %lfMHz\n", (double)(clock_rate)/1000000.0);
 #endif
 
 	//prepare list of files to ignores + list of mapped files
@@ -1332,12 +1333,12 @@ void replicate_finish() {
 	struct timeval cur_time;
 	gettimeofday(&cur_time, NULL);
 	DEBUGPRINTF("The replication itself lasted for %lf\n", TIMEVAL_DIFF(cur_time, start_time)/(1000000.0));
-	fprintf(stdout, "%lf\n", TIMEVAL_DIFF(cur_time, start_time)/(1000000.0));
+	fprintf(stdout, "Result: %lf\n", TIMEVAL_DIFF(cur_time, start_time)/(1000000.0));
 #endif
 
 	namemap_finish();
 
-///< @todo get rif of process_map_hts & fd_maps & fd_mappings hashmap. This is tricky, as they are shared across processes,
+///< @todo get rid of process_map_hts & fd_maps & fd_mappings hashmap. This is tricky, as they are shared across processes,
 //   so one can't just iterate throw them and blindly delete them
 //		hash_table_apply(process_ht_item->ht, fd_item_remove_fd_map);
 //		hash_table_destroy(process_ht_item->ht);
@@ -1392,9 +1393,15 @@ int replicate(list_t * list, int cpu, double scale, int op_mask, char * ifilenam
 	int64_t diff;
 	uint64_t counter_first, counter_last, counter_real;
 
-	if (op_mask & ACT_SIMULATE) {
-		global_fix_missing = 1;
+	if ( ! (op_mask & FIX_MISSING) ) {
+		global_fix_missing = 0;	
 	}
+
+	if ( (op_mask & ACT_REPLICATE) && ! (op_mask & TIME_ASAP) ) {
+		fprintf(stderr, "Determining clock rate..");
+		clock_rate = get_clock_rate();
+		fprintf(stderr, ": %lfMHz\n", (double)(clock_rate)/1000000.0);
+	}	
 
 	while (item) { 
 		i++;
