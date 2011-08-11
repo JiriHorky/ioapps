@@ -112,7 +112,7 @@ static PyObject * simulate(PyObject *self, PyObject *args) {
 
 	simulate_init(ACT_SIMULATE);
 	/* Call the C function */
-	if (replicate(list_g, 0, 1, ACT_SIMULATE, NULL, NULL)) {
+	if (replicate(list_g, 0, 1, ACT_SIMULATE | FIX_MISSING, NULL, NULL)) {
 		PyErr_SetString(PyExc_ValueError, "Error simulating of syscalls.");
 		return NULL;
 	}
