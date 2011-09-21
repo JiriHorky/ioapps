@@ -1,3 +1,15 @@
+v1.3
+   * New feature: Ioprofiler can now read incomplete traces
+   * New feature: Processes'info are now kept in hash tables to improve performance
+	* Bug fix: varios bugs fixed
+
+ -- Jiri Horky <jiri.horky@gmail.com>  Wed, 21 Sep 2011 08:59:05 +0200
+
+v1.2
+   * New feature: support for sendfile syscall
+   * New feature: support for incomplete traces (obtained by strace -p) for ioreplay
+
+ -- Jiri Horky <jiri.horky@gmail.com>  Sun, 10 Apr 2011 11:36:22 +0100
 
 v1.1
    * Bug fixed: ioprofiler can now re-open files without restarting the application
