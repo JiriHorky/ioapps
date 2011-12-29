@@ -174,7 +174,7 @@ item_t * replicate_get_fd_map(hash_table_t * ht, int fd, op_info_t * info, int o
 			op_it->o.retval = fd;
 			op_it->o.info.pid = info->pid;
 			replicate_get_missing_name(op_it->o.name, info->pid, fd);
-			op_it->o.flags =  0;
+			op_it->o.flags = O_RDWR;
 			op_it->o.info.start = info->start;
 
 			replicate_open(op_it, op_mask);
@@ -321,7 +321,7 @@ void replicate_write(write_item_t * op_it, int op_mask) {
 		}
 
 		if (retval == -1) {
-			ERRORPRINTF("Write to fd %d failed: %s\n", fd, strerror(errno));
+			ERRORPRINTF("Write to original fd %d (myfd: %d), name: %s failed: %s\n", fd, myfd, fd_item->fd_map->name, strerror(errno));
 		} else if (retval != op_it->o.retval) {
 			DEBUGPRINTF("Warning, %"PRIi64" bytes were successfully outputed (%"PRIi64" expected)\n", retval, op_it->o.retval);
 		}
@@ -996,9 +996,15 @@ void replicate_sendfile(sendfile_item_t * op_it, int op_mask) {
 			}
 		}
 		//check retval
-		if (retval == -1 && retval != op_it->o.retval) {
-			ERRORPRINTF("sendfile with time %d.%d from %d to %d failed (which was not expected): %s\n",
-					op_it->o.info.start.tv_sec, op_it->o.info.start.tv_usec, op_it->o.in_fd, op_it->o.out_fd, strerror(errno));
+		if (retval == -1 && retval != op_it->o.retval && ! supported_type(in_type)) {
+			ERRORPRINTF("sendfile with time %d.%d from %d (myfd: %d) to %d (myfd: %d) failed (which was not expected): %s\n",
+					op_it->o.info.start.tv_sec, op_it->o.info.start.tv_usec, op_it->o.in_fd, global_devzero_fd, op_it->o.out_fd, out_myfd, strerror(errno));
+		} else if (retval == -1 && retval != op_it->o.retval && ! supported_type(out_type)) {
+			ERRORPRINTF("sendfile with time %d.%d from %d (myfd: %d) to %d (myfd: %d) failed (which was not expected): %s\n",
+					op_it->o.info.start.tv_sec, op_it->o.info.start.tv_usec, op_it->o.in_fd, in_myfd, op_it->o.out_fd, global_devnull_fd, strerror(errno));
+		} else if (retval == -1 && retval != op_it->o.retval) {
+			ERRORPRINTF("sendfile with time %d.%d from %d (myfd: %d) to %d (myfd: %d) failed (which was not expected): %s\n",
+					op_it->o.info.start.tv_sec, op_it->o.info.start.tv_usec, op_it->o.in_fd, in_myfd, op_it->o.out_fd, out_myfd, strerror(errno));
 		} else if (retval != op_it->o.retval) {
 			ERRORPRINTF("sendfile's retval (%"PRIi64") is different from what expected(%"PRIi64")\n",
 					retval, op_it->o.retval);

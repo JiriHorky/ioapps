@@ -26,6 +26,7 @@
 #include <libgen.h>
 #include "common.h"
 #include "ioreplay.h"
+#include "print.h"
 #include "replicate.h"
 #include "stats.h"
 #include "simulate.h"
@@ -49,6 +50,7 @@ static struct option ioreplay_options[] = {
    { "output",			1,		NULL,	'o' },
    { "replicate",		0,		NULL,	'r' },
    { "prepare",		0,		NULL,	'p' },
+   { "print",		0,		NULL,	'P' },
    { "scale",			1,		NULL,	's' },
    { "stats",			1,		NULL,	'S' },
    { "timing",			1,		NULL,	't' },
@@ -69,6 +71,8 @@ printf("Usage: %s -c -f <file> [-F <format>] [-o <out>] [-v]\n", name);
 printf("   converts <file> in format <format> to binary form into file <out>\n\n");
 printf("Usage: %s -S -f <file> [-v]\n", name);
 printf("   displays some statistics about syscalls recorded in <file> (must be in " FORMAT_STRACE " format)\n\n");
+printf("Usage: %s -P -f <file> [-F <format>] [-v]\n", name);
+printf("   prints syscalls in normalized format\n\n");
 printf("Usage: %s -C -f <file> [-F <format>] [-i <file>] [-m <file>] [-v]\n", name);
 printf("   checks whether local enviroment is ready for replaying traces recorded in <file>.\n\n");
 printf("Usage: %s -r -f <file> [-F <format>] [-t <mode>] [-s <factor>] [-b <number>] [-i <file>] [-m <file>] [-v]\n", name);
@@ -95,6 +99,8 @@ printf("\n\
                      so every IO operation will return with same exit code as in original\n\
                      application. See also -i and/or -m parameters.\n\
                      Do nothing at the moment.\n\
+ -P --print          prints recorded syscalls in normalized format regardless the format\n\
+                     in which are the syscalls stored now\n\
  -r --replicate      will replicate every operation stored in file specified by -f\n\
  -s --scale <factor> scales delays between calls by the factor <factor>. Used with -r.\n\
  -S --stats          generate stats when processing the file. Can be combined with other\n\
@@ -145,7 +151,7 @@ int main(int argc, char * * argv) {
 	gettimeofday(&global_start, NULL);
 
 	/* Parse parameters */
-	while ((c = getopt_long (argc, argv, "b:cCdf:F:hi:m:Mo:rs:St:vV", ioreplay_options, NULL)) != -1 ) {
+	while ((c = getopt_long (argc, argv, "b:cCdf:F:hi:m:Mo:pPrs:St:vV", ioreplay_options, NULL)) != -1 ) {
 		switch (c) {
 			case 'b':
 				cpu = atoi(optarg);
@@ -187,6 +193,9 @@ int main(int argc, char * * argv) {
 				break;
 			case 'p':
 				action |= ACT_PREPARE;
+				break;
+			case 'P':
+				action |= ACT_PRINT;
 				break;
 			case 's':
 				scale = atof(optarg);
@@ -257,8 +266,10 @@ int main(int argc, char * * argv) {
 		fprintf(stdout, "No items loaded, nothin to do --> exiting.\n");
 		return 0;
 	}
-
-	if (action & ACT_CONVERT) {
+	if (action & ACT_PRINT) {
+		DEBUGPRINTF("Listing all syscalls in normalized format...%s", "\n");
+		print_items(list);
+	} else if (action & ACT_CONVERT) {
 		DEBUGPRINTF("Saving in binary form...%s", "\n");
 		bin_save_items(output, list);
 	} else if (action & ACT_SIMULATE) {
