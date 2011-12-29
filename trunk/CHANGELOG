@@ -1,7 +1,7 @@
 v1.3
    * New feature: Ioprofiler can now read incomplete traces
-   * New feature: Processes'info are now kept in hash tables to improve performance
-	* Bug fix: varios bugs fixed
+   * New feature: Processes' info is now kept in hash tables to improve performance
+	* Bug fix: various bugs fixed
 
  -- Jiri Horky <jiri.horky@gmail.com>  Wed, 21 Sep 2011 08:59:05 +0200
 
