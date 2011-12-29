@@ -88,15 +88,15 @@
 #define OP_FCNTL 'f'
 
 // Timing modes
-#define TIME_DIFF  0x80 ///< Try to hold the same difference between calls
+#define TIME_DIFF  0x80000000 ///< Try to hold the same difference between calls
 #define TIME_DIFF_STR "diff"
-#define TIME_EXACT 0x100 ///< Try to make calls in same time relative from start of the program
+#define TIME_EXACT 0x40000000 ///< Try to make calls in same time relative from start of the program
 #define TIME_EXACT_STR "exact"
-#define TIME_ASAP 0x40 ///< make calls as soon as possible
+#define TIME_ASAP 0x20000000 ///< make calls as soon as possible
 #define TIME_ASAP_STR "asap"
-#define TIME_MASK 0x1C0
+#define TIME_MASK 0xE0000000
 
-#define ACT_MASK 0x0000007F
+#define ACT_MASK 0x000000FF
 #define ACT_CONVERT 0x1
 #define ACT_SIMULATE 0x2
 #define ACT_REPLICATE 0x4
