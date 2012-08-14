@@ -578,11 +578,11 @@ class CentralWidget(QWidget):
         self.dict = {}
         self.dict[self.READS] = reads;
         self.dict[self.WRITES] = writes;
-        self.dataHolder.setData(self.dict)                                          
-        self.__showTable()        
+        self.dataHolder.setData(self.dict)
+        self.__showTable()
         self.tableW.recomputeData()
-        self.filter.rowsRemoved.connect(self.tableW.recomputeData)        
-        self.filter.rowsInserted.connect(self.tableW.recomputeData)                    
+        self.filter.rowsRemoved.connect(self.tableW.recomputeData)
+        self.filter.rowsInserted.connect(self.tableW.recomputeData)
         
     def __showTable(self):        
         if not self.fileName:
@@ -627,14 +627,14 @@ class MainWindow(QMainWindow):
     def __init__(self, parent = None):
         QMainWindow.__init__(self, parent)
 
-        self.fileName = None        
-        
+        self.fileName = None 
+
         self.resize(800, 600)        
         self.setWindowTitle(self.appName)
         
         open = QAction(QIcon('icons/open.png'), '&Open', self)
         open.setShortcut('Ctrl+O')
-        open.setStatusTip('Load file containing strace records')
+        open.setStatusTip('Load file containing recording traces')
         self.connect(open, SIGNAL('triggered()'), self.slotFile)
         
         exit = QAction(QIcon('icons/exit.png'), '&Exit', self)
@@ -659,11 +659,17 @@ class MainWindow(QMainWindow):
         
         help = menubar.addMenu('&About')
         help.addAction(aboutQt)
-                        
+
+        if len(sys.argv) > 1:
+            self.fileName = QString(sys.argv[1])
+            self.slotFile(self.fileName)
         
         
-    def slotFile(self):
-        fileName = QFileDialog.getOpenFileName(self, "", "~/school/diplomka/replicator/", "Repio binary files (*.bin);;Pure strace output (*.*)")        
+    def slotFile(self, fileName=None):
+        print fileName
+        if not fileName:
+	        fileName = QFileDialog.getOpenFileName(self, "", "~/", "Repio binary files (*.bin);;Pure strace output (*.*)")        
+        print fileName
         if fileName:
             self.fileName = fileName            
             self.updateWindowTitle()
