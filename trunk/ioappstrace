@@ -1,0 +1,42 @@
+#!/bin/bash
+usage="usage: $0 [-b] <profile> <command> <arg> ...
+    or: $0 [-b] <profile> -p <pid>
+    Uses strace to run a command to profile (with arguments),
+    or starce an existing process by pid.
+    Save strace output to <profile> (adds .log if not specified)
+    If -b is specified, ioreplay gets called to convert the trace to 
+    binary form and .bin is appended.
+    Either file can be opened by ioprofiler to visualize the io profile.
+    If you want to know more, read this script and/or for more info on ioapps,
+    see: http://code.google.com/p/ioapps/
+"
+
+if [ $# -lt 2 ]
+then
+    cat <<EOF
+$usage
+EOF
+    exit
+fi
+
+TOBIN=''
+while getopts "b" opt
+do
+  case $opt in
+    b)
+      TOBIN=yes
+      ;;
+  esac
+done
+shift $((OPTIND-1))
+
+profile=$1
+shift
+profile=${profile%.log}.log
+
+strace -q -a1 -s0 -f -tttT -o$profile -e trace=file,desc,process,socket $*
+if test -n "$TOBIN"; then
+    bprofile=${profile%.log}.bin
+    echo running ioreplay to convert $profile to $bprofile 1>&2
+    ioreplay -c -f $profile -o $bprofile
+fi
