@@ -668,7 +668,7 @@ class MainWindow(QMainWindow):
     def slotFile(self, fileName=None):
         print fileName
         if not fileName:
-	        fileName = QFileDialog.getOpenFileName(self, "", "~/", "Repio binary files (*.bin);;Pure strace output (*.*)")        
+	        fileName = QFileDialog.getOpenFileName(self, "", "~/", "Repio binary files (*.bin);;Pure strace output (*)")        
         print fileName
         if fileName:
             self.fileName = fileName            
