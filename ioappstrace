@@ -34,8 +34,8 @@ profile=$1
 shift
 profile=${profile%.log}.log
 
-strace -q -a1 -s0 -f -tttT -o$profile -e trace=file,desc,process,socket $*
-if test -n "$TOBIN"; then
+strace -q -a1 -s0 -f -tttT -o$profile -e trace=file,desc,process,socket "$@"
+if [ -n "$TOBIN" ]; then
     bprofile=${profile%.log}.bin
     echo running ioreplay to convert $profile to $bprofile 1>&2
     ioreplay -c -f $profile -o $bprofile
