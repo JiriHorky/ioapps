@@ -2,7 +2,7 @@
 usage="usage: $0 [-b] <profile> <command> <arg> ...
     or: $0 [-b] <profile> -p <pid>
     Uses strace to run a command to profile (with arguments),
-    or starce an existing process by pid.
+    or strace an existing process by pid.
     Save strace output to <profile> (adds .log if not specified)
     If -b is specified, ioreplay gets called to convert the trace to 
     binary form and .bin is appended.
