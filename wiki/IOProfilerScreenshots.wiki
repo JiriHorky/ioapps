@@ -1,13 +1,14 @@
 #summary Screenshots of IOProfiler
 =Main application window=
-http://elvys.farm.particle.cz/gui1.png
+<img src="http://ioapps.googlecode.com/files/gui1.png" alt="Main Window"/> 
 
 =Detailed information about access to a file=
 The plot shown consists of thousand of lines - each line represents one read request. One can zoom in to see details. 
 There is a list of all read requests on the left. The selected reads in the list can be highlighted in the plot. 
+<img src="http://ioapps.googlecode.com/files/gui2.png" alt="Access pattern diagram"/> 
 http://elvys.farm.particle.cz/gui2.png
 
 =Histograms=
-http://elvys.farm.particle.cz/gui3.png
-http://elvys.farm.particle.cz/gui4.png
-http://elvys.farm.particle.cz/gui5.png
+<img src="http://ioapps.googlecode.com/files/gui3.png" alt="Histogram1"/> 
+<img src="http://ioapps.googlecode.com/files/gui4.png" alt="Histogram2"/> 
+<img src="http://ioapps.googlecode.com/files/gui5.png" alt="Histogram3"/> 
