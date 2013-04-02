@@ -1,10 +1,17 @@
 #summary Screenshots of IOProfiler
 =Main application window=
+The main window lists all the files that were accessed during tracing of the program. The summary page contains number of reads/writes, total number of bytes transferred and time spent in IO operations for each file listed.
 <img src="http://ioapps.googlecode.com/files/gui1.png" alt="Main Window"/> 
 
+After clicking the "Details button", the access pattern diagram is shown.
+
 =Detailed information about access to a file=
-The plot shown consists of thousand of lines - each line represents one read request. One can zoom in to see details. 
+The access pattern diagram shown consists of thousand of lines - each line represents one read or write request, reads in this case. The length of each line represents number of bytes transferred during the IO request. The horizontal angle of each line represents time of how low the request took. 
+
 There is a list of all read requests on the left. The selected reads in the list can be highlighted in the plot. 
+
+One can zoom in to see details. 
+
 <img src="http://ioapps.googlecode.com/files/gui2.png" alt="Access pattern diagram"/> 
 http://elvys.farm.particle.cz/gui2.png
 
