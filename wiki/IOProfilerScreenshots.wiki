@@ -1,4 +1,6 @@
 #summary Screenshots of IOProfiler
+This page describes IOProfiler on real life example - IO profiling of starting Thunderbird v17.0.4. Ever wondered what taking so long when opening Thunderbird? Maybe there is just too much IO activity.
+
 =Main application window=
 The main window lists all the files that were accessed during tracing of the program. The summary page contains number of reads/writes, total number of bytes transferred and time spent in IO operations for each file listed.
 <img src="http://ioapps.googlecode.com/files/gui1.png" alt="Main Window"/> 
