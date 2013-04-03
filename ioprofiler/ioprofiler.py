@@ -622,7 +622,7 @@ class CentralWidget(QWidget):
 		
 
 class MainWindow(QMainWindow):
-	appName = "RepIO GUI"
+	appName = "IOprofiler - IOapps suite"
 	
 	def __init__(self, parent = None):
 		QMainWindow.__init__(self, parent)
