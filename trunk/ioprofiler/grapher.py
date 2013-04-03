@@ -210,7 +210,7 @@ class SubGrapher:
 		inRange = 0
 		step = 2
 
-		while inRange < np.size(data)*0.95: # make sure 95% of data are displayed
+		while inRange < np.size(data)*0.98: # make sure 98% of data are displayed
 			rangeMin = mean-step*std
 			rangeMax = mean+step*std
 			if rangeMin < 0:
@@ -218,7 +218,7 @@ class SubGrapher:
 
 			inRange = ((rangeMin <= data) & (data <= rangeMax)).sum()
 			step = step*2
-
+		print "step is", step
 		self.axes.hist(data, 50, facecolor='green', range=(rangeMin, rangeMax))
 		
 		self.axes.set_xlabel(xlabel)
