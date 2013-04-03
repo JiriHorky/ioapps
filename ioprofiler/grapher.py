@@ -206,10 +206,19 @@ class SubGrapher:
 		
 		mean = np.mean(data, dtype=np.float64);
 		std = np.std(data, dtype=np.float64);			
-		rangeMin = mean-4*std
-		rangeMax = mean+4*std
-		if rangeMin < 0:
-			rangeMin = 0
+		
+		inRange = 0
+		step = 2
+
+		while inRange < np.size(data)*0.95: # make sure 95% of data are displayed
+			rangeMin = mean-step*std
+			rangeMax = mean+step*std
+			if rangeMin < 0:
+				rangeMin = 0
+
+			inRange = ((rangeMin <= data) & (data <= rangeMax)).sum()
+			step = step*2
+
 		self.axes.hist(data, 50, facecolor='green', range=(rangeMin, rangeMax))
 		
 		self.axes.set_xlabel(xlabel)
