@@ -23,20 +23,23 @@ user@hostnaname $ ioprofiler ioproftrace.log
 }}}
 
 =Main application window=
-The main window lists all the files that were accessed during tracing of the program. The summary page contains number of reads/writes, total number of bytes transferred and time spent in IO operations for each file listed.
-<img src="http://ioapps.googlecode.com/files/gui1.png" alt="Main Window"/> 
+The main window lists all the files that were accessed during tracing of the program. The summary page contains number of reads/writes, total number of bytes transferred and time spent in IO operations for each file listed. In the screenshot below, the list fast sorted by number of calls.
 
-After clicking the "Details button", the access pattern diagram is shown.
+<img src="http://ioapps.googlecode.com/files/main_window.png" alt="Main Window"/> 
+
+As you can see, quite a lot file are accessed. In this case, the most accessed files are .msf files, for example thunderbird read more than 300MiB from "qt-interest.msf", even though it is just a 16MiB file! It implies that some parts of the file must have been read multiple times.
+
+After clicking the "Details button", the access pattern diagram is shown which should help us reveal it.
 
 =Detailed information about access to a file=
 The access pattern diagram shown consists of thousand of lines - each line represents one read or write request, reads in this case. The length of each line represents number of bytes transferred during the IO request. The horizontal angle of each line represents time of how low the request took. 
 
 There is a list of all read requests on the left. The selected reads in the list can be highlighted in the plot. 
 
-One can zoom in to see details. 
+One can zoom in using <img src="http://ioapps.googlecode.com/files/zoom_button.png" alt="zoom button"/> button to see details. 
 
-<img src="http://ioapps.googlecode.com/files/gui2.png" alt="Access pattern diagram"/> 
-http://elvys.farm.particle.cz/gui2.png
+<img src="http://ioapps.googlecode.com/files/access_pattern1.png" alt="Access pattern diagram of Thunderbird - overview"/> 
+
 
 =Histograms=
 <img src="http://ioapps.googlecode.com/files/gui3.png" alt="Histogram1"/> 
