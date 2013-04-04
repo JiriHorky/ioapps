@@ -437,15 +437,15 @@ class DetailDialog(QDialog):
 			else: 
 				self.grapher.plotWrites(self.displayStatistics.isChecked())
 		elif self.histSizeButton.isChecked():			
-			self.grapher.plotHistSize(self.displayStatistics.isChecked)
+			self.grapher.plotHistSize(self.displayStatistics.isChecked())
 			self.pickEnabled = False
 			self.__clearHighlighted()
 		elif self.histTimeButton.isChecked():
-			self.grapher.plotHistTime(self.displayStatistics.isChecked)
+			self.grapher.plotHistTime(self.displayStatistics.isChecked())
 			self.pickEnabled=  False
 			self.__clearHighlighted()
 		elif self.histSpeedButton.isChecked():
-			self.grapher.plotHistSpeed(self.displayStatistics.isChecked)
+			self.grapher.plotHistSpeed(self.displayStatistics.isChecked())
 			self.pickEnabled=  False
 			self.__clearHighlighted()
 		self.canvas.draw()   
