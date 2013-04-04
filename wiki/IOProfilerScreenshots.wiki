@@ -48,7 +48,7 @@ This detailed view of the first part of the diagram (see offsets) confirms our t
 
 <img src="http://ioapps.googlecode.com/files/access_pattern3.png" alt="Access pattern diagram of Thunderbird - detail 2"/> 
 
-This time, we zoomed to second part of the access diagram and clicked on one of the lines in the diagram. But there are three read requested highlighted in the list! Please note that they have the same offset. Let's have even closer look.
+This time, we zoomed to the second part of the access diagram and clicked on one of the lines in the diagram. But there are three read requested highlighted in the list! Please note that they have the same offset. Let's have even closer look.
 
 <img src="http://ioapps.googlecode.com/files/access_pattern4.png" alt="Access pattern diagram of Thunderbird - detail 3"/> 
 
@@ -63,6 +63,8 @@ Again, we clicked on what looked like as one line in the plot. But multiple read
 we see again that some parts of the file are read multiple times, here 20 times and more...
 
 =Histograms=
-<img src="http://ioapps.googlecode.com/files/gui3.png" alt="Histogram1"/> 
-<img src="http://ioapps.googlecode.com/files/gui4.png" alt="Histogram2"/> 
-<img src="http://ioapps.googlecode.com/files/gui5.png" alt="Histogram3"/> 
+We can confirm that majority of reads are 4KiB even though 12MiB of file was read by 8KiB requests:
+<img src="http://ioapps.googlecode.com/files/histsize.png" alt="Histogram size"/> 
+
+or see speed hitrogram which is not that interesting in this case. Most of the requests were cache already and so the main overhead is making the syscall itself.
+<img src="http://ioapps.googlecode.com/files/histspeed.png" alt="Histogram speed"/> 
