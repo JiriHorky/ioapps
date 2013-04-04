@@ -218,7 +218,6 @@ class SubGrapher:
 
 			inRange = ((rangeMin <= data) & (data <= rangeMax)).sum()
 			step = step*2
-		print "step is", step
 		self.axes.hist(data, 50, facecolor='green', range=(rangeMin, rangeMax))
 		
 		self.axes.set_xlabel(xlabel)
