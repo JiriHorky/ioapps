@@ -35,14 +35,15 @@ ioprofiler-trace -b -o OUT_FILE APPLICATION ARGUMENTS
 
 
 Deprecated method:
-  * trace the application of interest using this command
+  * ~~trace the application of interest using this command~~
 {{{
 strace -q -a1 -s0 -f -tttT -oOUT_FILE -e trace=file,desc,process,socket APPLICATION ARGUMENTS
 }}}
-  * _optionally_ [IOReplayConvert convert] the OUT_FILE to a binary form using [ioreplay] :
+  * ~~_optionally_ [IOReplayConvert convert] the OUT_FILE to a binary form using [ioreplay] ~~:
 {{{
 ioreplay -c -f OUT_FILE -o OUT_FILE.bin
 }}}
+
  == Running ioprofiler ==
   * run {{{ioprofiler OUT_FILE}}} or run {{{ioprofiler}}} and load {{{OUT_FILE}}} from the File menu.
 
@@ -67,11 +68,6 @@ make install_profiler
 }}}
 
 This will install ioapps python module and ioprofiler.py to your system. 
-===From RPM package===
-TO BE DONE
-
-This will install ioapps python module and ioprofiler.py to your system. 
-
 
 = Architecture = 
 IOProfiler is mainly written in Python, using PyQt4 as a GUI framework and Matplotlib library for plotting.
