@@ -48,12 +48,19 @@ This detailed view of the first part of the diagram (see offsets) confirms our t
 
 <img src="http://ioapps.googlecode.com/files/access_pattern3.png" alt="Access pattern diagram of Thunderbird - detail 2"/> 
 
-
+This time, we zoomed to second part of the access diagram and clicked on one of the lines in the diagram. But there are three read requested highlighted in the list! Please note that they have the same offset. Let's have even closer look.
 
 <img src="http://ioapps.googlecode.com/files/access_pattern4.png" alt="Access pattern diagram of Thunderbird - detail 3"/> 
 
+So from "microscopic" view, the access pattern is not the sequential as it seemed to be. Some parts of the read three times. But this still not explain the difference of 300MiB reads of total and 16MiB file. So let's see the last portion of the file.
+
 <img src="http://ioapps.googlecode.com/files/access_pattern5.png" alt="Access pattern diagram of Thunderbird - detail 4"/> 
 
+Again, we clicked on what looked like as one line in the plot. But multiple reads got selected, all of them with the same offsets. Having a closer look...
+
+<img src="http://ioapps.googlecode.com/files/access_pattern6.png" alt="Access pattern diagram of Thunderbird - detail 4"/> 
+
+we see again that some parts of the file are read multiple times, here 20 times and more...
 
 =Histograms=
 <img src="http://ioapps.googlecode.com/files/gui3.png" alt="Histogram1"/> 
