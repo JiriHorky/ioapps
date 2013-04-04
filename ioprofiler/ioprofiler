@@ -657,7 +657,12 @@ class MainWindow(QMainWindow):
 		self.centralW = CentralWidget()
 		self.setCentralWidget(self.centralW)
 		
-		help = menubar.addMenu('&About')
+		ioHelp = QAction(QIcon('icons/help.png'), '&Help', self)
+		ioHelp.setShortcut('F1')
+		ioHelp.setStatusTip('Displays a brief help of the program')
+		self.connect(ioHelp, SIGNAL('triggered()'), self.slotIoHelp)
+		help = menubar.addMenu('&Help')
+		help.addAction(ioHelp)
 		help.addAction(aboutQt)
 
 		if len(sys.argv) > 1:
@@ -678,6 +683,18 @@ class MainWindow(QMainWindow):
 	def slotAboutQt(self):
 		QMessageBox.aboutQt(self)
 	
+	def slotIoHelp(self):
+		QMessageBox.about(self, "Help", "IOprofiler - part of the IOapps suite<br>\
+				<a href=\"https://code.google.com/p/ioapps/\">https://code.google.com/p/ioapps/</a> <br> \
+				Written by Jiri Horky.<br><hr>\
+				GUI application for IO profiling. It can read strace output as well as binary traces converted by <bold>ioreplay</bold> application.<br>\
+				You can get traces of your applications by running a wrapper script:<br>\
+				<br>\
+				ioprofiler-trace &lt;program&gt; &lt;arguments&gt;<br>\
+				<br>\
+				which	will produce ioproftrace.log file. <br>\
+				See the project web page for more examples and description.");
+
 	def updateWindowTitle(self):
 		if self.fileName:
 			self.setWindowTitle(self.appName + " - " + self.fileName)
