@@ -18,9 +18,23 @@ Besides many advantages, usage of `strace` as a source of traces has its limitat
   * Zoomable, easy-to-save plots (both in vector and scalar format)
 
 = Screenshots =
-A picture is worth a thousand words, so please see [IOProfilerScreenshots screenshots].
+A picture is worth a thousand words, so this is one example:
+<img src="http://ioapps.googlecode.com/files/access_pattern3.png" alt="Access pattern diagram of Thunderbird - detail 2"/> 
+Please see [IOProfilerScreenshots screenshots] for more pictures with a detailed explanation.
 
 = Usage = 
+ == Getting traces ==
+  * The easiest way how to get traces is to use {{{ioprofiler-trace}}} wrapper around {{{strace}}}:
+{{{
+ioprofiler-trace APPLICATION ARGUMENTS
+}}}
+  * _optionally_ [IOReplayConvert convert] the OUT_FILE to a binary form with {{{-b}}} switch and select another output file name with {{{-o OUT_FILE}}} switch:
+{{{
+ioprofiler-trace -b -o OUT_FILE APPLICATION ARGUMENTS
+}}}
+
+
+Deprecated method:
   * trace the application of interest using this command
 {{{
 strace -q -a1 -s0 -f -tttT -oOUT_FILE -e trace=file,desc,process,socket APPLICATION ARGUMENTS
@@ -29,7 +43,8 @@ strace -q -a1 -s0 -f -tttT -oOUT_FILE -e trace=file,desc,process,socket APPLICAT
 {{{
 ioreplay -c -f OUT_FILE -o OUT_FILE.bin
 }}}
-  * run ioprofiler.py and load the OUT_FILE or a converted binary file OUT_FILE.bin
+ == Running ioprofiler ==
+  * run {{{ioprofiler OUT_FILE}}} or run {{{ioprofiler}}} and load {{{OUT_FILE}}} from the File menu.
 
 = Installation =
 ==Dependencies==
