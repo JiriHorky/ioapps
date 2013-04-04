@@ -27,9 +27,9 @@ The main window lists all the files that were accessed during tracing of the pro
 
 <img src="http://ioapps.googlecode.com/files/main_window.png" alt="Main Window"/> 
 
-As you can see, quite a lot file are accessed. In this case, the most accessed files are .msf files, for example thunderbird read more than 300MiB from "qt-interest.msf", even though it is just a 16MiB file! It implies that some parts of the file must have been read multiple times.
+As you can see, quite a lot of files are accessed. In this case, the most accessed files are .msf files, for example thunderbird read more than 300MiB from "qt-interest.msf", even though it is just a 16MiB file! It implies that some parts of the file must have been read multiple times.
 
-After clicking the "Details button", the access pattern diagram is shown which should help us reveal it.
+After clicking the "Details button", the access pattern diagram is shown which should help us reveal what happened exacly.
 
 =Detailed information about access to a file=
 The access pattern diagram shown consists of thousand of lines - each line represents one read or write request, reads in this case. The length of each line represents number of bytes transferred during the IO request. The horizontal angle of each line represents time of how low the request took. 
