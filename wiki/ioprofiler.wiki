@@ -34,7 +34,7 @@ ioprofiler-trace -b -o OUT_FILE APPLICATION ARGUMENTS
 }}}
 
 
-=== Deprecated method ===
+  === Deprecated method ===
   * ~~trace the application of interest using this command~~
 {{{
 strace -q -a1 -s0 -f -tttT -oOUT_FILE -e trace=file,desc,process,socket APPLICATION ARGUMENTS
