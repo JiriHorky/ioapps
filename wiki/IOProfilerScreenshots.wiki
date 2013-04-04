@@ -44,7 +44,11 @@ So have a closer look at all these three parts using <img src="http://ioapps.goo
 
 <img src="http://ioapps.googlecode.com/files/access_pattern2.png" alt="Access pattern diagram of Thunderbird - detail 1"/> 
 
+This detailed view of the first part of the diagram (see offsets) confirms our theory that it consits of strictly sequential 8KiB reads. One of the read was highlighted by clicking on it in the graph. This looks fine.
+
 <img src="http://ioapps.googlecode.com/files/access_pattern3.png" alt="Access pattern diagram of Thunderbird - detail 2"/> 
+
+
 
 <img src="http://ioapps.googlecode.com/files/access_pattern4.png" alt="Access pattern diagram of Thunderbird - detail 3"/> 
 
