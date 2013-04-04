@@ -23,6 +23,9 @@ A picture is worth a thousand words, so this is one example:
 Please see [IOProfilerScreenshots screenshots] for more pictures with a detailed explanation.
 
 = Usage = 
+Please see the step-by-step [IOProfilerScreenshots manual] with screenshots and detailed explanation. Quick summary follows:
+
+
  == Getting traces ==
   * The easiest way how to get traces is to use {{{ioprofiler-trace}}} wrapper around {{{strace}}}:
 {{{
