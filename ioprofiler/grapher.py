@@ -210,7 +210,7 @@ class SubGrapher:
 		inRange = 0
 		step = 2
 
-		while inRange < np.size(data)*0.98: # make sure 98% of data are displayed
+		while inRange < np.size(data)*0.99: # make sure 99% of data are displayed
 			rangeMin = mean-step*std
 			rangeMax = mean+step*std
 			if rangeMin < 0:
