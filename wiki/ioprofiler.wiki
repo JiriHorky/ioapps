@@ -49,7 +49,7 @@ ioreplay -c -f OUT_FILE -o OUT_FILE.bin
 {{{
 ioprofiler OUT_FILE
 }}}
-or run {{{ioprofiler}}} and load {{{OUT_FILE}}} from the File menu.
+  or run {{{ioprofiler}}} and load {{{OUT_FILE}}} from the File menu.
 
 = Installation =
 ==Dependencies==
