@@ -66,5 +66,5 @@ we see again that some parts of the file are read multiple times, here 20 times 
 We can confirm that majority of reads are 4KiB even though 12MiB of file was read by 8KiB requests:
 <img src="http://ioapps.googlecode.com/files/histsize.png" alt="Histogram size"/> 
 
-or see speed hitrogram which is not that interesting in this case. Most of the requests were cache already and so the main overhead is making the syscall itself.
+or see speed histogram. It cleary shows that majority of reads were cached already (I don't have that fast harddrive :) so the main overhead was making the syscall itself.
 <img src="http://ioapps.googlecode.com/files/histspeed.png" alt="Histogram speed"/> 
