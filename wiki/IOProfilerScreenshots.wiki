@@ -10,7 +10,7 @@ user@hostnaname $ ioprofiler-trace thunderbird
 
 Don't be surprised if the loading takes even longer than usual - that's because thunderbird makes quite a lot of syscalls so {{{strace}}} has quite a big overhead. But that's ok since we are now interested in access pattern not in exact timings.
 
-Once it loads, we just close the thunderbird window and check we have a trace log called "ioproftrace.log" because we did not specify another name using {{{-o}}} command line option:
+Once it loads, we just close the thunderbird window and check we have a trace log called "ioproftrace.log" because that's the default name of the log (one can specify another name using {{{-o}}} command line option):
 
 {{{
 user@hostnaname $ ls -l ioproftrace.log 
