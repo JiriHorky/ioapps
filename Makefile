@@ -30,7 +30,7 @@ install_replay: replay
 	$(MAKE) -C $(DOCDIR) install
 
 install_profiler: profiler
-	$(INSTALL) ioproftrace $(TARGET_PATH)
+	$(INSTALL) ioprofiler-trace $(TARGET_PATH)
 	$(MAKE) -C $(IOPROFILER) install
 
 install_ioproftrace:
