@@ -1,5 +1,26 @@
 #summary Screenshots of IOProfiler
-This page describes IOProfiler on real life example - IO profiling of starting Thunderbird v17.0.4. Ever wondered what taking so long when opening Thunderbird? Maybe there is just too much IO activity.
+This page describes IOProfiler on a real life example - IO profiling of starting Thunderbird v17.0.4. Ever wondered what taking so long to open  Thunderbird? Maybe there is just too much IO activity.
+
+=Getting traces=
+At first, we need to get traces of thunderbird during start up. We could use {{{strace}}} directly, or ioprofiler-trace which is a convenient wrapper around it:
+
+{{{
+user@hostnaname $ ioprofiler-trace thunderbird
+}}}
+
+Don't be surprised if the loading takes even longer than usual - that's because thunderbird makes quite a lot of syscalls so {{{strace}}} has quite a big overhead. But that's ok since we are now interested in access pattern not in exact timings.
+
+Once it load, we just close the thunderbird window and check we have a trace log called "ioproftrace.log" because we did not specify another name using {{{-o}}} command line option:
+
+{{{
+user@hostnaname $ ls -l ioproftrace.log 
+-rw-r--r-- 1 user user 74890554 Apr  4 22:04 ioproftrace.log
+}}}
+
+It seems OK, so we can run ioprofiler over it:
+{{{
+user@hostnaname $ ioprofiler ioproftrace.log 
+}}}
 
 =Main application window=
 The main window lists all the files that were accessed during tracing of the program. The summary page contains number of reads/writes, total number of bytes transferred and time spent in IO operations for each file listed.
