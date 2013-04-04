@@ -36,9 +36,19 @@ The access pattern diagram shown consists of thousand of lines - each line repre
 
 There is a list of all read requests on the left. The selected reads in the list can be highlighted in the plot. 
 
-One can zoom in using <img src="http://ioapps.googlecode.com/files/zoom_button.png" alt="zoom button"/> button to see details. 
-
 <img src="http://ioapps.googlecode.com/files/access_pattern1.png" alt="Access pattern diagram of Thunderbird - overview"/> 
+
+The good news is that the file is read sequentially from the macroscopic view (see the pictures below for detailed view). The diagram consists mainly of 3 sections, the first one from start of the file to around 12MiB offset, which seems to be made of 8KiB sequential reads (see list of calls on the left), the second part with a logarithmic shape from 12MiB to around 13.6MiB, and the last part from 13.6MiB to the end of the file which took majority of time, more then 6 seconds.
+
+So have a closer look at all these three parts using <img src="http://ioapps.googlecode.com/files/zoom_button.png" alt="zoom button"/> zoom button.
+
+<img src="http://ioapps.googlecode.com/files/access_pattern2.png" alt="Access pattern diagram of Thunderbird - detail 1"/> 
+
+<img src="http://ioapps.googlecode.com/files/access_pattern3.png" alt="Access pattern diagram of Thunderbird - detail 2"/> 
+
+<img src="http://ioapps.googlecode.com/files/access_pattern4.png" alt="Access pattern diagram of Thunderbird - detail 3"/> 
+
+<img src="http://ioapps.googlecode.com/files/access_pattern5.png" alt="Access pattern diagram of Thunderbird - detail 4"/> 
 
 
 =Histograms=
