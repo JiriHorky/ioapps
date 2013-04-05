@@ -32,7 +32,7 @@ As you can see, quite a lot of files are accessed. In this case, the most access
 After clicking the "Details button", the access pattern diagram is shown which should help us reveal what happened exacly.
 
 =Detailed information about access to a file=
-The access pattern diagram shown consists of thousand of lines - each line represents one read or write request, reads in this case. The length of each line represents number of bytes transferred during the IO request. The horizontal angle of each line represents time of how low the request took. 
+The access pattern diagram shown, although not visible at the firt glance, internally consists of thousand of lines - each line represents one read or write request, reads in this case. The length of each line represents number of bytes transferred during the IO request - the request's size. The horizontal angle of each line represents time of how long the request took. The longer it took the steeper the line will be. Very fast requests look like a straight horizontal line (of course, it all depends on the scale of the diagram).
 
 There is a list of all read requests on the left. The selected reads in the list can be highlighted in the plot. 
 
@@ -52,7 +52,7 @@ This time, we zoomed to the second part of the access diagram and clicked on one
 
 <img src="http://ioapps.googlecode.com/files/access_pattern4.png" alt="Access pattern diagram of Thunderbird - detail 3"/> 
 
-So from "microscopic" view, the access pattern is not the sequential as it seemed to be. Some parts of the read three times. But this still not explain the difference of 300MiB reads of total and 16MiB file. So let's see the last portion of the file.
+So from "microscopic" view, the access pattern is not the sequential as it seemed to be. Some parts of the read three times. But this still not explain the difference of 300MiB reads of total and 16MiB file. So let's see the last part of the file.
 
 <img src="http://ioapps.googlecode.com/files/access_pattern5.png" alt="Access pattern diagram of Thunderbird - detail 4"/> 
 
