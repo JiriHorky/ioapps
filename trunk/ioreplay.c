@@ -123,7 +123,7 @@ License GPLv2: GNU GPL version 2 <http://gnu.org/licenses/gpl.html>\n\
 This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
 \n\
-Written by Jiri Horky, 2010\n", VERSION);
+Written by Jiri Horky, 2010-2013\n", VERSION);
 }
 
 
