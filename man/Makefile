@@ -1,5 +1,5 @@
 MANPAGE=ioreplay.1
-MANDIR=/usr/share/man/man1/
+MANDIR?=/usr/share/man/man1/
 INSTALL=install
 
 all: $(MANPAGE)

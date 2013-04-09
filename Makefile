@@ -2,6 +2,7 @@
 
 DISTFILES=ioreplay
 DOCDIR=man
+MANDIR=/usr/share/man/man1/
 IOPROFILER=ioprofiler
 INSTALL=install
 TARGET_PATH=/usr/bin
@@ -9,6 +10,9 @@ SOURCES=ioreplay.c print.c in_common.c in_strace.c in_binary.c replicate.c simul
 CFLAGS=-c -g -Wall -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -I. -O3
 OBJFILES=$(subst .c,.o,$(SOURCES))
 DEPFILES=$(subst .c,.d,$(SOURCES))
+
+export MANDIR
+export INSTALL
 
 all: replay profiler
 
