@@ -3,13 +3,18 @@
  *
  * Simple doubly linked list implementation.
  *
- * Borrowed from Kalisto, written by:
+ * Copyright (c) 2001-2010
+ *   Department of Distributed and Dependable Systems
+ *   Faculty of Mathematics and Physics
+ *   Charles University, Czech Republic
  *
- * Copyright (c) 2001-2008
- * 	Distributed Systems Research Group
- * 	Department of Software Engineering
- * 	Faculty of Mathematics and Physics
- * 	Charles University, Czech Republic
+ * Licensed under the terms of the GNU General Public License, Version 2
+ *   Signed-off-by: Viliam Holub <holub@d3s.mff.cuni.cz>
+ *   Signed-off-by: Lubomir Bulej <bulej@d3s.mff.cuni.cz>
+ *   Signed-off-by: Petr Tuma <tuma@d3s.mff.cuni.cz>
+ *   Signed-off-by: Martin Decky <decky@d3s.mff.cuni.cz>
+ *
+ * Modified and enhanced by Jiri Horky <jiri.horky@gmail.com>
  *
  */
 

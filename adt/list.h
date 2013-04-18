@@ -3,12 +3,19 @@
  *
  * Simple doubly linked list implementation.
  *
- * JJJ OS
+ * Copyright (c) 2001-2010
+ *   Department of Distributed and Dependable Systems
+ *   Faculty of Mathematics and Physics
+ *   Charles University, Czech Republic
  *
- */
-
-/** Implemetation of the doubly linked list was taken from Kalisto experimental
- * kernel of MFF Charles University.
+ * Licensed under the terms of the GNU General Public License, Version 2
+ *   Signed-off-by: Viliam Holub <holub@d3s.mff.cuni.cz>
+ *   Signed-off-by: Lubomir Bulej <bulej@d3s.mff.cuni.cz>
+ *   Signed-off-by: Petr Tuma <tuma@d3s.mff.cuni.cz>
+ *   Signed-off-by: Martin Decky <decky@d3s.mff.cuni.cz>
+ *
+ * Modified and enhanced by Jiri Horky <jiri.horky@gmail.com>
+ *
  */
 
 #ifndef LIST_H_
