@@ -684,7 +684,7 @@ class MainWindow(QMainWindow):
 		QMessageBox.aboutQt(self)
 	
 	def slotIoHelp(self):
-		QMessageBox.about(self, "Help", "IOprofiler v1.4-r1 - part of the IOapps suite<br>\
+		QMessageBox.about(self, "Help", "IOprofiler v1.4-r2 - part of the IOapps suite<br>\
 				<a href=\"https://code.google.com/p/ioapps/\">https://code.google.com/p/ioapps/</a> <br> \
 				Written by Jiri Horky.<br><hr>\
 				GUI application for IO profiling. It can read strace output as well as binary traces converted by <bold>ioreplay</bold> application.<br>\
