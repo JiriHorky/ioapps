@@ -54,7 +54,7 @@
 #define MAX_DATA (1024*1024*64)
 #define MAX_TIME_STRING 20
 #define MAX_PARENT_IDS 20
-#define VERSION "1.4-r1"
+#define VERSION "1.4-r2"
 
 #define OFFSET_INVAL -1
 

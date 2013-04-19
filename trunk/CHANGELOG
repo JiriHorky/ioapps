@@ -1,3 +1,8 @@
+v1.4-r2
+	* Fix: license and copyright information in all source files
+
+ -- Jiri Horky <jiri.horky@gmail.com>  Fri, 19 Apr 2013 09:10:05 +0200
+
 v1.4-r1
 	* Fix: tarball included .svn files
 	* Fix: ioprofiler.1 manpage is now included in install
