@@ -2,10 +2,10 @@
 
 DISTFILES=ioreplay
 DOCDIR=man
-MANDIR=/usr/share/man/man1/
+MANDIR=$(DESTDIR)/usr/share/man/man1/
 IOPROFILER=ioprofiler
 INSTALL=install
-TARGET_PATH=/usr/bin
+TARGET_PATH=$(DESTDIR)/usr/bin
 SOURCES=ioreplay.c print.c in_common.c in_strace.c in_binary.c replicate.c simulate.c stats.c fdmap.c namemap.c simfs.c adt/list.c adt/hash_table.c adt/fs_trie.c
 CFLAGS=-c -g -Wall -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -I. -O3
 OBJFILES=$(subst .c,.o,$(SOURCES))
