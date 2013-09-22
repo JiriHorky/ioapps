@@ -970,7 +970,7 @@ int strace_read_stat(char * line, list_t * list) {
 	op_item = new_stat_item();
 	op_item->type = OP_STAT;
 
-   if ((retval = sscanf(line, "%d %s %*[^\"]\"%" QUOTE(MAX_STRING) "[^\"]\", %*[^)]) = %d%*[^<]<%[^>]", &op_item->o.info.pid, start_time, op_item->o.name, &op_item->o.retval, dur)) == EOF) {
+   if ((retval = sscanf(line, "%d %s %*[^\"]\"%" QUOTE(MAX_STRING) "[^\"]\", %*[^)])%*[^=] = %d%*[^<]<%[^>]", &op_item->o.info.pid, start_time, op_item->o.name, &op_item->o.retval, dur)) == EOF) {
 		ERRORPRINTF("Error: unexpected end of file%s", "\n");
 		free(op_item);
 		return -1;
