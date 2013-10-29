@@ -1106,14 +1106,23 @@ void replicate_dup(dup_item_t * op_it, int op_mask) {
 			return;
 		}
 	}
+
    if ( (it = replicate_get_fd_map(ht, fd, &(op_it->o.info), op_mask)) == NULL) {
       ERRORPRINTF("Can not find mapping for fd: %d. Corresponding open call probably missing.\n", fd);
    } else {
       fd_item = hash_table_entry(it, fd_item_t, item);
 		fd_item_new = new_fd_item();
 		fd_item_new->old_fd = new_fd;
-		free(fd_item_new->fd_map); // we will use the same fd_map as previous fd, because we are just dupl.
+		free(fd_item_new->fd_map); // we will use the same fd_map as previous fd, because we are just duplicate.
 		fd_item_new->fd_map = fd_item->fd_map;
+		if ( hash_table_find(ht, &fd) != NULL) { //dup2 call can be called on already opened files, they are closed first
+			close_item_t * close_item = new_close_item();
+			close_item->o.info.pid = op_it->o.info.pid;
+			close_item->o.fd = new_fd;
+			close_item->o.retval = 0;
+			replicate_close(close_item, op_mask);
+			free(close_item);
+		}
 		insert_parent_fd(fd_item, new_fd);
 //		DEBUGPRINTF("%d: Duplicating fd %d->%d to %d->%d.\n", pid, fd, fd_item->fd_map->my_fd, new_fd,
 //				fd_item->fd_map->my_fd);
