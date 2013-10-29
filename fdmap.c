@@ -321,10 +321,11 @@ int delete_parent_fd(fd_item_t * fd_item, int fd) {
 	for(i = 0; i < MAX_PARENT_IDS; i++) {
 		if (parents[i] == fd) {
 			int idx = fd_item->fd_map->last_par_index;
-			if ( idx == 0 ) {
+			if ( i == fd_item->fd_map->last_par_index ) { //last item in the list
 				parents[i] = -1;
 			} else if ( idx > 0 ) {
 				parents[i] = parents[idx];
+				parents[idx] = -1;
 			} else {
 				ERRORPRINTF("Sanity check error: last_par_index out of bounds: %d\n", idx);
 				assert(1 == 0);
