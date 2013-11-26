@@ -67,7 +67,27 @@ unsigned long long clock_rate = 0;
 
 struct timeval start_time;
 
+#ifdef __powerpc__
+static inline unsigned long long rdtsc(void)
+{
+	unsigned long long int result;
+	unsigned long int upper, lower, tmp;
+	__asm__ volatile(
+			"0:                     \n"
+			"\tmftbu   %0           \n"
+			"\tmftb    %1           \n"
+			"\tmftbu   %2           \n"
+			"\tcmpw    %2,%0        \n"
+			"\tbne     0b           \n"
+			: "=r"(upper), "=r"(lower), "=r"(tmp)
+			);
+	result = upper;
+	result = result << 32;
+	result = result | lower;
 
+	return result;
+}
+#else
 static inline unsigned long long int rdtsc(void) {
 	unsigned a, d;
 
@@ -75,6 +95,7 @@ static inline unsigned long long int rdtsc(void) {
 
 	return ((unsigned long long)a) | (((unsigned long long)d) << 32);;
 }
+#endif
 
 unsigned long long  get_clock_rate() {
 	unsigned long long x1;
