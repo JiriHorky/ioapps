@@ -1,3 +1,9 @@
+v1.4-r3
+	* Fix: declaration of simfs_init masks that the function accepts parameter causing possible stack underflow
+	  (thanks Michael Tautschnig - Debian Bug#748218)
+
+ -- Jiri Horky <jiri.horky@gmail.com>  Mon, 2 Jun 2014 21:53:05 +0200
+
 v1.4-r2
 	* Fix: license and copyright information in all source files
 
