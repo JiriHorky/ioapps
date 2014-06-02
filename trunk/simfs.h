@@ -56,7 +56,7 @@ typedef struct simfs {
 	trie_node_t node; ///< I am part of the node	
 } simfs_t;
 
-void simfs_init();
+void simfs_init(int mask);
 void simfs_finish();
 void simfs_dump();
 int simfs_stat(stat_op_t * stat_op);
