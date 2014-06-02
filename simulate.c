@@ -88,7 +88,7 @@ void simulate_init(int mode) {
 
 	hash_table_init(sim_map_read, HASH_TABLE_SIZE, &ht_ops_sim);
 	hash_table_init(sim_map_write, HASH_TABLE_SIZE, &ht_ops_sim);
-	simfs_init();
+	simfs_init(mode);
 }
 
 /** Frees all variables used for simulations. Call this function at the end, as you will not be able
